@@ -1,25 +1,40 @@
 
 const http=require("http"),
+request = require("request")
 path=require("path"),
-url=require("url");
+url=require("url"),
+plugins=require("./plugins.js"),
+stream=require("stream");
 
 const index=process.argv[2] || 0, // 获取配置索引
-confgs=(d=>d instanceof Array?d:[d])(require(path.resolve(process.cwd(),"./proxy.config.js"))).map(o=>(!/^\w+:\/\//.test(o.host)&&(o.host='http://'+o.host),o)), //获取全部配置
+configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
+defaultPort=configall.defaultPort,
+confgs=(d=>d instanceof Array?d:[d])(configall.proxy).map(o=>(!/^\w+:\/\//.test(o.location)&&(o.location='http://'+o.location),o)), //获取全部配置
 confg=confgs[index],//获取当前配置
-domain=url.parse(confg.host||"http:localhost:3001"),
-{port="",hostname=""}=domain,
-protocol=(domain.protocol||"http").replace(":",""),
-hosts=confgs.map(o=>(t=>port?`${t}:${port}`:t)(`${protocol}://${hostname}`));
-
-const textcontent=(h,res,fnc=(t=>t))=>{
+hosts=confgs.map((o,i)=>{
+  const domain=url.parse(o.location||"http:localhost:3001"),
+  {port="",hostname=""}=domain,
+  protocol=(domain.protocol||"http").replace(":",""),
+  serverPort=o.serverPort||(defaultPort+Number(i));//服务端
+  return {
+    protocol,
+    hostname,
+    port,
+    host:port?`${protocol}://${hostname}:${port}`:`${protocol}://${hostname}`,
+    serverPort
+  };
+}),
+{port,hostname,protocol,serverPort}=hosts[index];// 获取对饮篇日志
+//发送数据
+const textcontent=(h,res,fnc)=>{
   const iscode=/text|javascript|json/.test(h["content-type"]);
   let dt="";
   return (data,isend)=>{
-      if(iscode){
+      if(iscode && fnc){
         if(!isend){
           dt+=data.toString();
         }else{
-          res.end(fnc(dt))
+          res.end(fnc?fnc(dt,hosts):dt);
         }
       }else{
         return isend?res.end():res.write(data);
@@ -35,7 +50,18 @@ const deletekey=(o={},ks=[])=>{
   })
   return o;
 };
+const corsHeader={
+  'Access-Control-Allow-Origin': 'http://10.200.207.195:5222',
+  'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
+  'Access-Control-Allow-Headers': 'Accept, Referer, Accept-Language, Connection, Pragma, Authorization, Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, X-File-Type, Cache-Control, Origin',
+  "Access-Control-Expose-Headers": "Authorization",
+  "Access-Control-Allow-Credentials":"true"
+};
 http.createServer((req,res)=>{
+  if (req.method == 'OPTIONS') {
+    res.writeHead(204,corsHeader);
+    return res.end();
+  }
   const options={
     type:protocol,
     host:hostname,
@@ -56,15 +82,27 @@ http.createServer((req,res)=>{
     body:req.body,
     method: req.method
   },res2=>{
-    res.writeHead(200,deletekey(res2.headers,["content-security-policy","content-encoding"]));//删除csp限制
-    const execcontent=textcontent(res2.headers,res);
+    if(res2.statusCode !== 200){
+      res.writeHead(500,{});//删除csp限制
+      res.end();
+      return; 
+    }
+    let headers=res2.headers;
+    headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
+    headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials","access-Control-Allow-Credentials"]);//删除已统一配置的key
+    headers=Object.assign(headers,corsHeader);
+    res.writeHead(200,headers);//删除csp限制
+    istextHtml=(res2.headers["content-type"]||"").includes("text/html")
+    const execcontent=textcontent(res2.headers,res,istextHtml&&plugins.insertInnerScript);
     res2.on('data', function(data) {
       execcontent(data);
     });
     res2.on('end', function(data) {
       execcontent(data,1);
     });
-  }).end();
-}).listen((confg.serverPort||9200)+Number(index));
+    
+  });
+  req.pipe(reqs2);
+}).listen(serverPort);
 
-console.log("服务启动:",(confg.serverPort||9200)+Number(index),confg.host)
+console.log("服务启动:",serverPort,confg.location)

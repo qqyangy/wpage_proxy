@@ -1,6 +1,7 @@
 const child_process=require("child_process"),
 path=require("path");
-const confgs=(d=>d instanceof Array?d:[d])(require(path.resolve(process.cwd(),"./proxy.config.js")));
+const configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
+confgs=(d=>d instanceof Array?d:[d])(configall.proxy);
 const servers=confgs.map((c,i)=>{
 
   const server=child_process.exec(`node ${path.resolve(__dirname,"./server.js")} ${i}`,(error, stdout, stderr)=>{
