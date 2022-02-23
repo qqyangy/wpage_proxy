@@ -9,11 +9,17 @@ const plugins={
   //设置xhr
   xhrtxt(){
     return ()=>{
-      const myfetch=window.fetch;
+      const myfetch=window.fetch,
+      myopen=XMLHttpRequest.prototype.open;
+      const filterUrl=(url="")=>{
+        const index=hosts.findIndex(d=>url.includes(d.host));
+        return index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].serverPort}`):url;
+      }
       window.fetch=function fetch(url,...p){
-        const index=hosts.findIndex(d=>url.includes(d.host)),
-        origin=index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].serverPort}`):url;
-        return myfetch(origin,...p);
+        return myfetch(filterUrl(url),...p);
+      }
+      XMLHttpRequest.prototype.open=function open(type,url,...p){
+        return myopen.call(this,type,filterUrl(url),...p);
       }
     }
   },

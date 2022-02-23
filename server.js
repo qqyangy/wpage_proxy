@@ -57,7 +57,6 @@ const deletekey=(o={},ks=[])=>{
   return o;
 };
 const corsHeader={
-  // 'Access-Control-Allow-Origin': 'http://localhost:5222',
   'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
   'Access-Control-Allow-Headers': 'Accept, Referer, Accept-Language, Connection, Pragma, Authorization, Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, X-File-Type, Cache-Control, Origin',
   // "Access-Control-Expose-Headers": "Authorization",
@@ -81,7 +80,7 @@ http.createServer((req,res)=>{
     referer:(req.headers.referer||"").replace(req.headers.host,nhost)
   })
   if(confg.cookie){
-    headers.cookie=confg.cookie;
+    headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
   const reqs2=http.request({
     ...options,
@@ -98,7 +97,7 @@ http.createServer((req,res)=>{
     headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
     headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
     headers=Object.assign(headers,corsHeader);
-    res.writeHead(200,headers);//删除csp限制
+    res.writeHead(200,headers);
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
     const execcontent=textcontent(res2.headers,res,istextHtml&&plugins.insertInnerScript);
     res2.on('data', function(data) {
