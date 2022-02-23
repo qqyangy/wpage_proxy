@@ -13,7 +13,6 @@ const plugins={
       window.fetch=function fetch(url,...p){
         const index=hosts.findIndex(d=>url.includes(d.host)),
         origin=index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].serverPort}`):url;
-        console.log(origin,url);
         return myfetch(origin,...p);
       }
     }

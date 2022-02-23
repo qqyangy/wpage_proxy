@@ -1,5 +1,5 @@
 module.exports={
-  defaultPort:9200,
+  serverPort:9200,
   proxy:[
     {
       location:"parent.test.17zuoye.net",
