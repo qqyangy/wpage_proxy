@@ -4,6 +4,7 @@ request = require("request")
 path=require("path"),
 url=require("url"),
 plugins=require("./plugins.js"),
+utils=require("./utils.js"),
 stream=require("stream");
 
 const index=process.argv[2] || 0, // 获取配置索引
@@ -11,7 +12,7 @@ configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultServerPort=configall.serverPort||9200,
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy).map(o=>(!/^\w+:\/\//.test(o.location)&&(o.location='http://'+o.location),o)); //获取全部配置
 //配置可继承属性
-["cookie"].forEach(k=>{
+["cookie","module"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
     !o.hasOwnProperty(k) && (o[k]=configall[k]);
   })
@@ -31,6 +32,17 @@ hosts=confgs.map((o,i)=>{
   };
 }),
 {port,hostname,protocol,serverPort}=hosts[index];// 获取对饮篇日志
+const parseNetDatas={
+  reqHead:[confg.reqHead],
+  reqBody:[confg.reqBody],
+  resHead:[confg.resHead],
+  resBody:[confg.module&&plugins.moduleCode,confg.resBody]
+},
+//生成过滤器调用函数
+filterNetDataFunc=(env,ary=[],nary=[])=>{
+  const a=ary.concat(nary).filter(f=>f && f instanceof Function);
+  return a.length>0&&((t,hs)=>a.reduce((r,f)=>f(r,env),t));
+}
 //发送数据
 const textcontent=(h,res,fnc)=>{
   const iscode=/text|javascript|json/.test(h["content-type"]);
@@ -68,6 +80,16 @@ http.createServer((req,res)=>{
     res.writeHead(204,corsHeader);
     return res.end();
   }
+  //定制环境数据
+  const filterNetDataFunc2=filterNetDataFunc.bind(null,{
+    url:req.url,
+    oldOrigin:hosts[index].host,
+    newOrigin:(t=>{
+      return utils.urlfromat(t,"http",serverPort);
+    })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
+    hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
+    hosts
+  });
   const options={
     type:protocol,
     host:hostname,
@@ -99,16 +121,20 @@ http.createServer((req,res)=>{
     headers=Object.assign(headers,corsHeader);
     res.writeHead(200,headers);
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
-    const execcontent=textcontent(res2.headers,res,istextHtml&&plugins.insertInnerScript);
+    const execcontent=textcontent(res2.headers,res,filterNetDataFunc2(parseNetDatas.resBody,[istextHtml&&plugins.insertInnerScript]));
     res2.on('data', function(data) {
       execcontent(data);
     });
     res2.on('end', function(data) {
       execcontent(data,1);
     });
-    
   });
-  req.pipe(reqs2);
+  req.on("data",function(data){
+    reqs2.write(data);
+  })
+  req.on("end",function(){
+    reqs2.end();
+  })
 }).listen(serverPort);
 
 console.log("服务启动:",serverPort,confg.location)
