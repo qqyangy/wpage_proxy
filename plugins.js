@@ -43,8 +43,15 @@ const plugins={
     }
   },
   // 处理配置项的module字段
-  moduleCode(text,{hosts,hostName,oldOrigin}){
-    console.log(hostName);
+  moduleCode(text,{hosts,hostName,oldOrigin,contentType,url}){
+    if(/html|javascript/.test(contentType)){
+      hosts.forEach(o=>{
+        let i=0;
+        while((i=text.indexOf(o.host,i))!==-1){
+          text=text.replace(o.host,`http://${hostName}:${o.serverPort}`);
+        }
+      })
+    }
     return text;
   }
 }

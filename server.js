@@ -81,7 +81,7 @@ http.createServer((req,res)=>{
     return res.end();
   }
   //定制环境数据
-  const filterNetDataFunc2=filterNetDataFunc.bind(null,{
+  const env={
     url:req.url,
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
@@ -89,7 +89,9 @@ http.createServer((req,res)=>{
     })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
     hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
     hosts
-  });
+  };
+  const filterNetDataFunc2=filterNetDataFunc.bind(null,env);
+
   const options={
     type:protocol,
     host:hostname,
@@ -121,6 +123,7 @@ http.createServer((req,res)=>{
     headers=Object.assign(headers,corsHeader);
     res.writeHead(200,headers);
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
+    env.contentType=res2.headers["content-type"]||"";//设置content-type
     const execcontent=textcontent(res2.headers,res,filterNetDataFunc2(parseNetDatas.resBody,[istextHtml&&plugins.insertInnerScript]));
     res2.on('data', function(data) {
       execcontent(data);
