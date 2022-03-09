@@ -83,9 +83,18 @@ http.createServer((req,res)=>{
     res.writeHead(204,corsHeader);
     return res.end();
   }
+
+  const options={
+    type:protocol,
+    host:hostname,
+    port,
+    path:req.url,
+    url:`${protocol}://${hostname}${port?`:${port}`:""}${req.url}`
+  };
   //定制环境数据
   const env={
-    url:req.url,
+    url:options.url,
+    path:req.url,
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
       return utils.urlfromat(t,"http",serverPort);
@@ -93,14 +102,7 @@ http.createServer((req,res)=>{
     hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
     hosts
   };
-  const filterNetDataFunc2=filterNetDataFunc.bind(null,env);
-  const options={
-    type:protocol,
-    host:hostname,
-    port,
-    path:req.url,
-    url:`${protocol}://${hostname}${port?`:${port}`:""}${req.url}`
-  },
+  const filterNetDataFunc2=filterNetDataFunc.bind(null,env),
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
     host:nhost,
@@ -117,8 +119,8 @@ http.createServer((req,res)=>{
   },(err,res2)=>{
     // req.url==="/spa/activity/foxvip/"&&console.log(res2.statusCode);
     if(res2.statusCode !== 200 || err){
-      res.writeHead(500,{statusCode:(res2&&res2.statusCode)||500,err});//删除csp限制
-      res.end();
+      res.writeHead(500,{});//删除csp限制
+      res.end({statusCode:(res2&&res2.statusCode)||500,err});
       return; 
     }
     let headers=res2.headers;
