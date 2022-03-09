@@ -7,6 +7,7 @@ plugins=require("./plugins.js"),
 utils=require("./utils.js"),
 stream=require("stream");
 
+
 const index=process.argv[2] || 0, // 获取配置索引
 configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultServerPort=configall.serverPort||9200,
@@ -47,15 +48,14 @@ filterNetDataFunc=(env,ary=[],nary=[])=>{
 const textcontent=(h,res,fnc)=>{
   const iscode=/text|javascript|json/.test(h["content-type"]);
   let dt="";
-  return (data,isend)=>{
+  return (data,isend,url)=>{
       if(iscode && fnc){
-        if(!isend){
-          dt+=data.toString();
-        }else{
+        dt+=data;
+        if(isend){
           res.end(fnc?fnc(dt,hosts):dt);
         }
       }else{
-        return isend?res.end():res.write(data);
+        return isend?res.end(data):res.write(data);
       }
   }
 };
@@ -74,6 +74,9 @@ const corsHeader={
   // "Access-Control-Expose-Headers": "Authorization",
   "Access-Control-Allow-Credentials":"true"
 };
+
+
+
 http.createServer((req,res)=>{
   req.headers.origin&&Object.assign(corsHeader,{"Access-Control-Allow-Origin":req.headers.origin});//允许对当前域跨域
   if (req.method == 'OPTIONS') {
@@ -91,12 +94,12 @@ http.createServer((req,res)=>{
     hosts
   };
   const filterNetDataFunc2=filterNetDataFunc.bind(null,env);
-
   const options={
     type:protocol,
     host:hostname,
     port,
     path:req.url,
+    url:`${protocol}://${hostname}${port?`:${port}`:""}${req.url}`
   },
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
@@ -106,14 +109,15 @@ http.createServer((req,res)=>{
   if(confg.cookie){
     headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
-  const reqs2=http.request({
+  let data2;
+  const reqs2=request({
     ...options,
     headers,
-    body:req.body,
     method: req.method
-  },res2=>{
-    if(res2.statusCode !== 200){
-      res.writeHead(500,{});//删除csp限制
+  },(err,res2)=>{
+    // req.url==="/spa/activity/foxvip/"&&console.log(res2.statusCode);
+    if(res2.statusCode !== 200 || err){
+      res.writeHead(500,{statusCode:(res2&&res2.statusCode)||500,err});//删除csp限制
       res.end();
       return; 
     }
@@ -125,18 +129,19 @@ http.createServer((req,res)=>{
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
     env.contentType=res2.headers["content-type"]||"";//设置content-type
     const execcontent=textcontent(res2.headers,res,filterNetDataFunc2(parseNetDatas.resBody,[istextHtml&&plugins.insertInnerScript]));
-    res2.on('data', function(data) {
-      execcontent(data);
-    });
-    res2.on('end', function(data) {
-      execcontent(data,1);
-    });
+    execcontent(data2,1,options.url);
   });
   req.on("data",function(data){
     reqs2.write(data);
   })
   req.on("end",function(){
     reqs2.end();
+  })
+  reqs2.on("data",function(data){
+    data2=data2?Buffer.concat([data2,data],data2.length+data.length):data;
+  })
+  reqs2.on("end",function(data){
+    data&&(data2=data2?Buffer.concat([data2,data],data2.length+data.length):data);
   })
 }).listen(serverPort);
 
