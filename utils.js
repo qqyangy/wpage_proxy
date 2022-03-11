@@ -55,6 +55,12 @@ module.exports={
   extractRes(pcfg,cfg,env){
     const url=env.url;
     const resultfuncs=[];
-    formatReqCfg(pcfg.req,url,resultfuncs);
+    formatReqCfg(pcfg.req,url,resultfuncs); // 处理根配置
+    formatReqCfg(cfg.req,url,resultfuncs); // 处理对应域配置
+    const mock="mockIndex" in resultfuncs;//是否为mock类型
+    return {
+      mock,
+      res:mock?resultfuncs[resultfuncs.mockIndex]:resultfuncs
+    }
   }
 }
