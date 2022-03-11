@@ -11,7 +11,7 @@ stream=require("stream");
 const index=process.argv[2] || 0, // 获取配置索引
 configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultServerPort=configall.serverPort||9200,
-confgs=(d=>d instanceof Array?d:[d])(configall.proxy).map(o=>(!/^\w+:\/\//.test(o.location)&&(o.location='http://'+o.location),o)); //获取全部配置
+confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.location).map(o=>(!/^\w+:\/\//.test(o.location)&&(o.location='http://'+o.location),o)); //获取全部配置
 //配置可继承属性
 ["cookie","module"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
@@ -83,7 +83,6 @@ http.createServer((req,res)=>{
     res.writeHead(204,corsHeader);
     return res.end();
   }
-
   const options={
     type:protocol,
     host:hostname,
@@ -102,6 +101,12 @@ http.createServer((req,res)=>{
     hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
     hosts
   };
+
+  const resExecs=(()=>{
+    
+  })();
+
+
   const filterNetDataFunc2=filterNetDataFunc.bind(null,env),
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
