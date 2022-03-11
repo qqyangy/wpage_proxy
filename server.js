@@ -33,30 +33,27 @@ hosts=confgs.map((o,i)=>{
   };
 }),
 {port,hostname,protocol,serverPort}=hosts[index];// 获取对饮篇日志
-const parseNetDatas={
-  reqHead:[confg.reqHead],
-  reqBody:[confg.reqBody],
-  resHead:[confg.resHead],
-  resBody:[confg.module&&plugins.moduleCode,confg.resBody]
-},
-//生成过滤器调用函数
-filterNetDataFunc=(env,ary=[],nary=[])=>{
-  const a=ary.concat(nary).filter(f=>f && f instanceof Function);
-  return a.length>0&&((t,hs)=>a.reduce((r,f)=>f(r,env),t));
-}
 //发送数据
-const textcontent=(h,res,fnc)=>{
+const textcontent=(h,env,fncs)=>{
   const iscode=/text|javascript|json/.test(h["content-type"]);
-  let dt="";
-  return (data,isend,url)=>{
-      if(iscode && fnc){
-        dt+=data;
-        if(isend){
-          res.end(fnc?fnc(dt,hosts):dt);
-        }
-      }else{
-        return isend?res.end(data):res.write(data);
+  return (data)=>{
+      let result={body:data,headers:Object.assign({},h)};
+      if(iscode && fncs.length>0){
+        let rdata=result.body.toString();
+        fncs.forEach(f=>{
+          const d=f.call(result,rdata,result.headers,Object.assign({},env));
+          if(d!==undefined){
+            result.body=d;
+          }
+        });
+        // 标准化响应体
+        ({
+          object:()=>result.body=JSON.stringify(result.body),
+          function:()=>result.body=result.body.toString()
+        }[result.body && (typeof result.body)]||(()=>{}))();
+        !(result.headers&&result.headers.constructor===Object)&&(result.headers={});//如果headers不是对象则重置为空对象
       }
+      return result;
   }
 };
 //删除指定key
@@ -111,7 +108,6 @@ http.createServer((req,res)=>{
     res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
     return res.end(isJson?JSON.stringify(body):body);
   }
-  const filterNetDataFunc2=filterNetDataFunc.bind(null,env),
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
     host:nhost,
@@ -135,12 +131,16 @@ http.createServer((req,res)=>{
     let headers=res2.headers;
     headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
     headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
-    headers=Object.assign(headers,corsHeader);
-    res.writeHead(200,headers);
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
     env.contentType=res2.headers["content-type"]||"";//设置content-type
-    const execcontent=textcontent(res2.headers,res,filterNetDataFunc2(parseNetDatas.resBody,[istextHtml&&plugins.insertInnerScript]));
-    execcontent(data2,1,options.url);
+    const beforfuncs=[confg.module&&plugins.moduleCode],
+    afterfunc=[istextHtml&&plugins.insertInnerScript];
+    // 加工响应数据
+    const execcontent=textcontent(res2.headers,env,beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function"));
+    const resultdata=execcontent(data2);
+    // 响应数据
+    res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
+    res.end(resultdata.body);
   });
   req.on("data",function(data){
     reqs2.write(data);

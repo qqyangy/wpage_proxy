@@ -1,6 +1,6 @@
 const plugins={
   //插入代码
-  insertInnerScript(html="",{hosts}){
+  insertInnerScript(html="",h,{hosts}){
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
       filterUrl=${plugins.filterUrl().toString()};
@@ -43,7 +43,7 @@ const plugins={
     }
   },
   // 处理配置项的module字段
-  moduleCode(text,{hosts,hostName,oldOrigin,contentType,url}){
+  moduleCode(text,h,{hosts,hostName,oldOrigin,contentType,url}){
     if(/html|javascript/.test(contentType)){
       hosts.forEach(o=>{
         let i=0;
