@@ -102,11 +102,15 @@ http.createServer((req,res)=>{
     hosts
   };
 
-  const resExecs=(()=>{
-    
-  })();
-
-
+  const resConfig=utils.extractRes(configall,confg,env)//获取配置中req项
+  if(resConfig.mock){
+    // 处理mock结果
+    const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
+    body=resConfig.res.body,
+    isJson=typeof body === 'object';
+    res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
+    return res.end(isJson?JSON.stringify(body):body);
+  }
   const filterNetDataFunc2=filterNetDataFunc.bind(null,env),
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
