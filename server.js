@@ -100,7 +100,7 @@ http.createServer((req,res)=>{
     hosts
   };
 
-  const resConfig=utils.extractRes(configall,confg,env)//获取配置中req项
+  const resConfig=utils.extractTrans(configall,confg,env)//获取配置中req项
   if(resConfig.mock){
     // 处理mock结果
     const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
@@ -118,7 +118,7 @@ http.createServer((req,res)=>{
   if(confg.cookie){
     headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
-  const resStream=new MyWriteStream();
+  const resStream=new MyWriteStream();//响应数据中转流
   const reqs2=request({
     ...options,
     headers,

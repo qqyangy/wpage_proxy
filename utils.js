@@ -6,7 +6,19 @@ const getObject=(d,env)=>{
 // 获取正确的body数据
 getBodyData=(d,env)=>{
   return typeof d === "function"?d(env):d
-}
+},
+// 对象赋值
+setValue=(target,obj={},keys=[])=>{
+  target&&keys.forEach(k=>{
+    if(target && k in obj){
+      target[k]=obj[k];
+    }
+  })
+},
+// 判断是否具备指定key
+iskeys=(obj={},keys=[])=>keys.some(k=>k in obj)
+
+const configkeys=["path","query","method","bodyfs","statusCode"];//需要统一处理的配置项
 function formatResCfg(res,url,results,env){
   return ({
     "[object Function]":()=>results.push(res),
@@ -19,25 +31,34 @@ function formatResCfg(res,url,results,env){
         if(!sTest && !rTest) return;//有test且验证不通过
       }
       const headers=res.headers&&(res.headers.constructor===Object||res.headers.constructor===Function)&&res.headers; //获取配置的headers
-      if("body" in res){
-        // 需要使用mock数据
-        results.mockIndex=results.length;
-        results.push(function(){
-          headers&&(this.headers=getObject(headers,env));//判断是否需要设置headers
-          this.body=getBodyData(res.body,env);
-          return this;
-        });
-      }else if(res.handler && res.handler.constructor===Function){
-        // 使用handler处理
-        results.push(headers?function(...p){
-          this.headers=getObject(headers,env);
-          return res.handler.call(this,...p);
-        }:res.handler);
-      }else if(headers){
-        // 只有headers时生成处理函数
-        return  results.push(function(){
-            this.headers=getObject(headers,env);
-        })
+      switch(true){
+        case "body" in res:
+          // 需要使用mock数据
+          results.mockIndex=results.length;
+          return results.push(function(){
+            setValue(this,res,configkeys);
+            headers&&(this.headers=getObject(headers,env));//判断是否需要设置headers
+            this.body=getBodyData(res.body,env);
+            return this;
+          });
+        case res.handler && res.handler.constructor===Function:
+           // 使用handler处理
+          return results.push(headers?function(...p){
+              setValue(this,res,configkeys);
+              this.headers=getObject(headers,env);
+              return res.handler.call(this,...p);
+          }:res.handler);
+        case headers:
+          // 只有headers时生成处理函数
+          return  results.push(function(){
+              setValue(this,res,configkeys);
+              this.headers=getObject(headers,env);
+          })
+        case iskeys(res,configkeys):
+          // 处理 path、query
+          return  results.push(function(){
+              setValue(this,res,configkeys);
+          })
       }
     }
   }[Object.prototype.toString.call(res)]||(()=>{}))()
@@ -61,16 +82,16 @@ module.exports={
     }
     return url;;
   },
-  // 提取res配置
-  extractRes(pcfg,cfg,env){
+  // 提取res 与 req配置
+  extractTrans(pcfg,cfg,env,key="res"){
     const url=env.url;
     const resultfuncs=[];
-    formatResCfg(pcfg.res,url,resultfuncs,env); // 处理根配置
-    formatResCfg(cfg.res,url,resultfuncs,env); // 处理对应域配置
+    formatResCfg(pcfg[key],url,resultfuncs,env); // 处理根配置
+    formatResCfg(cfg[key],url,resultfuncs,env); // 处理对应域配置
     const mock="mockIndex" in resultfuncs;//是否为mock类型
     return {
       mock,
-      res:mock?resultfuncs[resultfuncs.mockIndex].call({}):resultfuncs
+      [key]:mock?resultfuncs[resultfuncs.mockIndex].call({}):resultfuncs
     }
   }
 }
