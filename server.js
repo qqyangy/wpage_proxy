@@ -1,11 +1,12 @@
 
 const http=require("http"),
-request = require("request")
+request = require("request"),
 path=require("path"),
 url=require("url"),
 plugins=require("./plugins.js"),
 utils=require("./utils.js"),
-stream=require("stream");
+stream=require("stream"),
+{MyWriteStream}=require("./MyStream.js");
 
 
 const index=process.argv[2] || 0, // 获取配置索引
@@ -109,25 +110,27 @@ http.createServer((req,res)=>{
     return res.end(isJson?JSON.stringify(body):body);
   }
   nhost=port?hostname+":"+port:hostname,
-  headers=Object.assign(deletekey(req.headers,["accept-encoding"]),{
+  headers=Object.assign(deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{
     host:nhost,
     referer:(req.headers.referer||"").replace(req.headers.host,nhost)
   })
+  delete headers.cookie;
   if(confg.cookie){
     headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
-  let data2;
+  const resStream=new MyWriteStream();
   const reqs2=request({
     ...options,
     headers,
     method: req.method
-  },(err,res2,data)=>{
+  },(err,res2)=>{
     if(err || res2.statusCode >= 500){
       res.writeHead(500,{});//删除csp限制
       return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
     }
     let headers=res2.headers;
     headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
+    headers=deletekey(headers,["last-modified","etag"]);//删除缓存相关
     headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
     env.contentType=res2.headers["content-type"]||"";//设置content-type
@@ -136,15 +139,14 @@ http.createServer((req,res)=>{
     filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
     // 加工响应数据
     const execcontent=textcontent(res2.headers,env,filters);
-    const resultdata=execcontent(data);
-    if(env.url.includes("master098f6/logo.png")){
-      console.log(data.length);
-    }
-    // 响应数据
-    res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
-    res.end(resultdata.body);
+    resStream.then(d=>{
+      const resultdata=execcontent(d);
+      res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
+      res.end(resultdata.body);
+    });
   });
-  req.pipe(reqs2);
+  // console.log("\n\n\n\n\n\n\n\n\n\n");
+  req.pipe(reqs2).pipe(resStream);
 }).listen(serverPort);
 
 console.log("服务启动:",serverPort,confg.location)
