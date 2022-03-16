@@ -39,8 +39,8 @@ const textcontent=(h,env,fncs)=>{
   return (data)=>{
       let result={body:data,headers:Object.assign({},h)};
       if(iscode && fncs.length>0){
-        let rdata=result.body.toString();
         fncs.forEach(f=>{
+          const rdata=Buffer.isBuffer(result.body)?result.body.toString():result.body;
           const d=f.call(result,rdata,result.headers,Object.assign({},env));
           if(d!==undefined){
             result.body=d;
@@ -121,12 +121,10 @@ http.createServer((req,res)=>{
     ...options,
     headers,
     method: req.method
-  },(err,res2)=>{
-    // req.url==="/spa/activity/foxvip/"&&console.log(res2.statusCode);
-    if(res2.statusCode !== 200 || err){
+  },(err,res2,data)=>{
+    if(err || res2.statusCode >= 500){
       res.writeHead(500,{});//删除csp限制
-      res.end({statusCode:(res2&&res2.statusCode)||500,err});
-      return; 
+      return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
     }
     let headers=res2.headers;
     headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
@@ -134,26 +132,19 @@ http.createServer((req,res)=>{
     istextHtml=(res2.headers["content-type"]||"").includes("text/html")
     env.contentType=res2.headers["content-type"]||"";//设置content-type
     const beforfuncs=[confg.module&&plugins.moduleCode],
-    afterfunc=[istextHtml&&plugins.insertInnerScript];
+    afterfunc=[istextHtml&&plugins.insertInnerScript],
+    filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
     // 加工响应数据
-    const execcontent=textcontent(res2.headers,env,beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function"));
-    const resultdata=execcontent(data2);
+    const execcontent=textcontent(res2.headers,env,filters);
+    const resultdata=execcontent(data);
+    if(env.url.includes("master098f6/logo.png")){
+      console.log(data.length);
+    }
     // 响应数据
     res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
     res.end(resultdata.body);
   });
-  req.on("data",function(data){
-    reqs2.write(data);
-  })
-  req.on("end",function(){
-    reqs2.end();
-  })
-  reqs2.on("data",function(data){
-    data2=data2?Buffer.concat([data2,data],data2.length+data.length):data;
-  })
-  reqs2.on("end",function(data){
-    data&&(data2=data2?Buffer.concat([data2,data],data2.length+data.length):data);
-  })
+  req.pipe(reqs2);
 }).listen(serverPort);
 
 console.log("服务启动:",serverPort,confg.location)
