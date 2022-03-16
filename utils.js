@@ -1,3 +1,5 @@
+const path=require("path"),
+fs=require("fs");
 // 获取正确的headers格式
 const getObject=(d,env)=>{
   const rd=typeof d === "function"?d(env):d;
@@ -16,9 +18,21 @@ setValue=(target,obj={},keys=[])=>{
   })
 },
 // 判断是否具备指定key
-iskeys=(obj={},keys=[])=>keys.some(k=>k in obj)
+iskeys=(obj={},keys=[])=>keys.some(k=>k in obj),
+// 处理bodyFile配置
+setBodyFile=(target)=>{
+  if(target.constructor===Object && target.bodyFile){
+    const pt=path.resolve(process.cwd(),target.bodyFile);
+    if(!fs.existsSync(pt)){
+      console.log(`指定的bodyFile：${target.bodyFile} 不存在!`);
+    }else{
+      target.body=fs.readFileSync(pt);
+    }
+  }
+  return target;
+}
 
-const configkeys=["path","query","method","bodyfs","statusCode"];//需要统一处理的配置项
+const configkeys=["path","query","method","bodyFile","statusCode"];//需要统一处理的配置项
 function formatResCfg(res,url,results,env){
   return ({
     "[object Function]":()=>results.push(res),
@@ -32,14 +46,13 @@ function formatResCfg(res,url,results,env){
       }
       const headers=res.headers&&(res.headers.constructor===Object||res.headers.constructor===Function)&&res.headers; //获取配置的headers
       switch(true){
-        case "body" in res:
+        case iskeys(res,["body","bodyFile"]):
           // 需要使用mock数据
           results.mockIndex=results.length;
           return results.push(function(){
             setValue(this,res,configkeys);
             headers&&(this.headers=getObject(headers,env));//判断是否需要设置headers
-            this.body=getBodyData(res.body,env);
-            return this;
+            return this.body=getBodyData(res.body,env);
           });
         case res.handler && res.handler.constructor===Function:
            // 使用handler处理
