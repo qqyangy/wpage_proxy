@@ -3,6 +3,7 @@ const {Writable} = require('stream');
 class MyWriteStream extends Writable {
   constructor(dt, opt) {
     super(opt);
+    this.dataBuffer=dt;
   }
   //实现 _write() 方法
   _write(chunk, encoding, callback) {
@@ -10,7 +11,15 @@ class MyWriteStream extends Writable {
     callback();
   }
   then(fn){
-      return this._writableState.finished?fn(this.dataBuffer):this.on("finish",fn.bind(null,this.dataBuffer));//监听完成状态
+    return new Promise(resolve=>{
+        if(this._writableState.finished){
+            resolve(fn(this.dataBuffer));
+        }else{
+            this.on("finish",()=>{
+                resolve(fn(this.dataBuffer));
+            })
+        }
+    })
   }
 }
 

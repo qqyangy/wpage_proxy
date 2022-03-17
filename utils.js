@@ -1,5 +1,7 @@
 const path=require("path"),
-fs=require("fs");
+fs=require("fs"),
+url=require("url"),
+{MyWriteStream}=require("./MyStream.js");
 // 获取正确的headers格式
 const getObject=(d,env)=>{
   const rd=typeof d === "function"?d(env):d;
@@ -30,9 +32,37 @@ setBodyFile=(target)=>{
     }
   }
   return target;
-}
+},
+// 合并生成请求头
+mergeReqOptions=(optins,reqdt)=>{
+  const mkeys=["method"];//可直接合并的key
+  const isUrl=iskeys(reqdt,["path","query","hash"]),
+  isMkeys=iskeys(reqdt,mkeys),
+  isheaders=reqdt.headers&&reqdt.headers.constructor===Object;
+  if(!isUrl && !isMkeys && !isheaders){
+    return optins; // 无任何需要变更时
+  }
+  const nOptins=Object.assign({},optins);
+  // 处理url相关
+  if(isUrl){
+    const ourl=url.parse(optins.url);
+    reqdt.path&&(ourl.pathname=reqdt.path.replace(/^./,t=>t==="/"?t:`/${t}`));
+    reqdt.query&&(ourl.search=reqdt.query.replace(/^./,t=>t==="?"?t:`?${t}`));
+    reqdt.hash&&(ourl.hash=reqdt.hash.replace(/^#/,""));
+    optins.path=ourl.pathname+ourl.search+(reqdt.hash?`#${reqdt.hash}`:"");
+    optins.url=url.format(ourl);
+  }
+  // 处理method
+  reqdt.method&&(optins.method=/(?:get|post|head|put|delete)/i.test(reqdt.method)?reqdt.method.toUpperCase():optins.method);
+  // 处理可直接合并的属性
+  isMkeys && mkeys.forEach(k=>(nOptins[k]=reqdt[k]));
+  // 处理请求头信息
+  if(isheaders){
+    nOptins.headers=Object.assign({},nOptins.headers,reqdt.headers)
+  }
+};
 
-const configkeys=["path","query","method","bodyFile","statusCode"];//需要统一处理的配置项
+const configkeys=["path","query","hash","method","bodyFile","statusCode"];//需要统一处理的配置项
 function formatResCfg(res,url,results,env){
   return ({
     "[object Function]":()=>results.push(res),
@@ -104,7 +134,40 @@ module.exports={
     const mock="mockIndex" in resultfuncs;//是否为mock类型
     return {
       mock,
-      [key]:mock?resultfuncs[resultfuncs.mockIndex].call({}):resultfuncs
+      [key]:mock && key==="res"?resultfuncs[resultfuncs.mockIndex].call({}):resultfuncs
     }
+  },
+  // 处理响应mock数据方法
+  resMock(res,resConfig){
+    const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
+    body=resConfig.res.body,
+    isJson=typeof body === 'object';
+    res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
+    res.end(isJson?JSON.stringify(body):body);
+  },
+  // 请求相关处理
+  reqFilter(optins,config,env){
+    let resolve;
+    const reqStream=new MyWriteStream(),
+    reqPromise=new Promise(r=>(resolve=r));
+    const result={reqStream,reqPromise};
+    if(config.req.length===0){
+      reqStream.then(d=>{
+        reqPromise({optins,data:d});
+      });
+      return result;
+    }
+    const headers=Object.assign({},optins.headers),
+    noptions=Object.assign({},optins);
+    reqStream.then(d=>{
+      const purl=url.parse(optins.url);
+      const target={headers,body:d,path:purl.pathname,query:purl.search,hash:purl.hash,method:optins.method};
+      config.req.forEach(fus=>{
+        fus.call(target,Object.assign({},headers),Object.assign({},env));
+      })
+      mergeReqOptions(noptions,target);
+      reqPromise({optins:noptions,data:target.body});
+    })
+    return result;
   }
 }

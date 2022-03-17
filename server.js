@@ -100,30 +100,27 @@ http.createServer((req,res)=>{
     hosts
   };
 
-  const resConfig=utils.extractTrans(configall,confg,env)//获取配置中req项
+  const resConfig=utils.extractTrans(configall,confg,env)//获取配置中res项
   if(resConfig.mock){
-    // 处理mock结果
-    const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
-    body=resConfig.res.body,
-    isJson=typeof body === 'object';
-    res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
-    return res.end(isJson?JSON.stringify(body):body);
+    return utils.resMock(res,resConfig); // 处理mock结果
   }
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{
     host:nhost,
     referer:(req.headers.referer||"").replace(req.headers.host,nhost)
   })
-  delete headers.cookie;
   if(confg.cookie){
     headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
   const resStream=new MyWriteStream();//响应数据中转流
-  const reqs2=request({
+  const reqOptions={
     ...options,
     headers,
     method: req.method
-  },(err,res2)=>{
+  };
+  const reqConfig=utils.extractTrans(configall,confg,env,"req")//获取配置中req项
+  
+  const reqs2=request(reqOptions,(err,res2)=>{
     if(err || res2.statusCode >= 500){
       res.writeHead(500,{});//删除csp限制
       return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
