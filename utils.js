@@ -63,6 +63,7 @@ mergeReqOptions=(optins,reqdt)=>{
 };
 
 const configkeys=["path","query","hash","method","bodyFile","statusCode"];//需要统一处理的配置项
+// 格式化 res 和 req配置为函数
 function formatResCfg(res,url,results,env){
   return ({
     "[object Function]":()=>results.push(res),
@@ -145,7 +146,7 @@ module.exports={
     res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
     res.end(isJson?JSON.stringify(body):body);
   },
-  // 请求相关处理
+  // 按照配置处理加工 请求相关数据
   reqFilter(optins,config,env){
     let resolve;
     const reqStream=new MyWriteStream(),
@@ -153,7 +154,7 @@ module.exports={
     const result={reqStream,reqPromise};
     if(config.req.length===0){
       reqStream.then(d=>{
-        reqPromise({optins,data:d});
+        resolve({optins,data:d});
       });
       return result;
     }
@@ -163,10 +164,25 @@ module.exports={
       const purl=url.parse(optins.url);
       const target={headers,body:d,path:purl.pathname,query:purl.search,hash:purl.hash,method:optins.method};
       config.req.forEach(fus=>{
-        fus.call(target,Object.assign({},headers),Object.assign({},env));
+        const rdt=fus.call(target,target.body,Object.assign({},headers),Object.assign({},env));//调用函数并获得返回值
+        target.body=rdt!==undefined?rdt:target.body;
       })
-      mergeReqOptions(noptions,target);
-      reqPromise({optins:noptions,data:target.body});
+      // 处理参数为对象的形式
+      if(target.query && target.query.constructor === Object){
+        target.query=Object.keys((r,k)=>{
+          return (t=>r?`&${r}${t}`:t)(`${k}=${target.query[k]}`);
+        },"");
+      }
+      // 处理返回数据为非字符串和非buffer时的转换
+      if(target.body && !Buffer.isBuffer(target.body) && typeof target !=="string"){
+        if(target.body instanceof Object){
+          target.body=JSON.stringify(target.body);
+        }else if(target.body.toString){
+          target.body=target.body.toString();
+        }
+      }
+      mergeReqOptions(noptions,target);//合并结果
+      resolve({optins:noptions,data:target.body});
     })
     return result;
   }

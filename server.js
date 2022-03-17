@@ -112,38 +112,44 @@ http.createServer((req,res)=>{
   if(confg.cookie){
     headers.cookie=confg.cookie; //有配置cookie时代理cookie
   }
-  const resStream=new MyWriteStream();//响应数据中转流
-  const reqOptions={
+ 
+  const reqOptionsInit={
     ...options,
     headers,
     method: req.method
   };
   const reqConfig=utils.extractTrans(configall,confg,env,"req")//获取配置中req项
-  
-  const reqs2=request(reqOptions,(err,res2)=>{
-    if(err || res2.statusCode >= 500){
-      res.writeHead(500,{});//删除csp限制
-      return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
-    }
-    let headers=res2.headers;
-    headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
-    headers=deletekey(headers,["last-modified","etag"]);//删除缓存相关
-    headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
-    istextHtml=(res2.headers["content-type"]||"").includes("text/html")
-    env.contentType=res2.headers["content-type"]||"";//设置content-type
-    const beforfuncs=[confg.module&&plugins.moduleCode],
-    afterfunc=[istextHtml&&plugins.insertInnerScript],
-    filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
-    // 加工响应数据
-    const execcontent=textcontent(res2.headers,env,filters);
-    resStream.then(d=>{
-      const resultdata=execcontent(d);
-      res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
-      res.end(resultdata.body);
+  const {reqStream,reqPromise}=utils.reqFilter(reqOptionsInit,reqConfig,env);
+  req.pipe(reqStream);
+  reqPromise.then(({optins:reqOptions,data:reqdata})=>{
+    const resStream=new MyWriteStream();//响应数据中转流
+    // 发起请求
+    const reqs2=request(reqOptions,(err,res2)=>{
+      if(err || res2.statusCode >= 500){
+        res.writeHead(500,{});//删除csp限制
+        return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
+      }
+      let headers=res2.headers;
+      headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
+      headers=deletekey(headers,["last-modified","etag"]);//删除缓存相关
+      headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
+      istextHtml=(res2.headers["content-type"]||"").includes("text/html")
+      env.contentType=res2.headers["content-type"]||"";//设置content-type
+      const beforfuncs=[confg.module&&plugins.moduleCode],
+      afterfunc=[istextHtml&&plugins.insertInnerScript],
+      filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
+      // 加工响应数据
+      const execcontent=textcontent(res2.headers,env,filters);
+      resStream.then(d=>{
+        const resultdata=execcontent(d);
+        res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
+        res.end(resultdata.body);
+      });
     });
-  });
-  // console.log("\n\n\n\n\n\n\n\n\n\n");
-  req.pipe(reqs2).pipe(resStream);
+    reqs2.pipe(resStream);
+    reqs2.end(reqdata);
+  })
+
 }).listen(serverPort);
 
 console.log("服务启动:",serverPort,confg.location)
