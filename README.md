@@ -59,9 +59,9 @@
             - return 值为响应数据
           - `:string|:json` 使用指定的数据响应
         - `handler` `:function` 对真实的象印数据处理 同res直接配置为函数的形式
-      - `req` `:object|:function`
-        - `:function` 同res的函数配置形式
-        - `test/headers/bodyFile/body/handler` 同res
-        - `statusCode` `:number` 配置显示的状态码
+    - `req` `:object|:function`
+      - `:function` 同res的函数配置形式
+      - `test/headers/bodyFile/body/handler` 同res
+      - `statusCode` `:number` 配置显示的状态码
 
   
