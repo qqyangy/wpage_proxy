@@ -112,7 +112,7 @@ http.createServer((req,res)=>{
       const execcontent=utils.textcontent(res2.headers,env,filters);
       resStream.then(d=>{
         const resultdata=execcontent(d);
-        res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));
+        res.writeHead(resultdata.statusCode||res.statusCode||200,Object.assign(headers,resultdata.headers,corsHeader));
         res.end(resultdata.body);
       });
     });

@@ -189,7 +189,7 @@ module.exports={
     const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
     body=resConfig.res.body,
     isJson=!Buffer.isBuffer(resConfig.res.body) && typeof body === 'object';
-    res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
+    res.writeHead(resConfig.res.statusCode||200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
     res.end(isJson?JSON.stringify(body):body);
   },
   // 按照配置处理加工 请求相关数据
