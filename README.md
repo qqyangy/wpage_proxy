@@ -30,7 +30,7 @@
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量
 - `serverPort` `:number` 全局配置端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
-- `proxy` `:array|:object` 配置需要代理的域名
+- `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
   - `location` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
   - `serverPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
@@ -55,17 +55,18 @@
           - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】
         - `body` `:function|:string|:json` 优先级2 【使用mock数据并不会向原服务器发送请求】
           - `:function`
-            - 可接受一个参数 `env` 环境包
-            - return 值为响应数据
+              - 可接受一个参数 `env` 环境包
+              - return 值为响应数据
           - `:string|:json` 使用指定的数据响应
         - `handler` `:function` 对真实的象印数据处理 同res直接配置为函数的形式
     - `req` `:object|:function`
       - `:function` 同res的函数配置形式
-      - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
-      - `statusCode` `:number` 配置显示的状态码
-      - `path` `:string` 配置修改源服务器路径 比如 希望请求a接口却返回b接口数据
-      - `query` `:string|:object` 配置调整请求原url的参数部分
-      - `hash` `:string` 调整请求时hash 正常情况没什么用
-      - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
+      - `:object`
+          - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
+          - `statusCode` `:number` 配置显示的状态码
+          - `path` `:string` 配置修改源服务器路径 比如 希望请求a接口却返回b接口数据
+          - `query` `:string|:object` 配置调整请求原url的参数部分
+          - `hash` `:string` 调整请求时hash 正常情况没什么用
+          - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
 
   
