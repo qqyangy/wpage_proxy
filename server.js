@@ -34,38 +34,8 @@ hosts=confgs.map((o,i)=>{
   };
 }),
 {port,hostname,protocol,serverPort}=hosts[index];// 获取对饮篇日志
-//发送数据
-const textcontent=(h,env,fncs)=>{
-  const iscode=/text|javascript|json/.test(h["content-type"]);
-  return (data)=>{
-      let result={body:data,headers:Object.assign({},h)};
-      if(iscode && fncs.length>0){
-        fncs.forEach(f=>{
-          const rdata=Buffer.isBuffer(result.body)?result.body.toString():result.body;
-          const d=f.call(result,rdata,result.headers,Object.assign({},env));
-          if(d!==undefined){
-            result.body=d;
-          }
-        });
-        // 标准化响应体
-        ({
-          object:()=>result.body=JSON.stringify(result.body),
-          function:()=>result.body=result.body.toString()
-        }[result.body && (typeof result.body)]||(()=>{}))();
-        !(result.headers&&result.headers.constructor===Object)&&(result.headers={});//如果headers不是对象则重置为空对象
-      }
-      return result;
-  }
-};
-//删除指定key
-const deletekey=(o={},ks=[])=>{
-  ks.forEach(k=>{
-    if(Object.prototype.hasOwnProperty.call(o,k)){
-      delete o[k];
-    }
-  })
-  return o;
-};
+
+
 const corsHeader={
   'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
   'Access-Control-Allow-Headers': 'Accept, Referer, Accept-Language, Connection, Pragma, Authorization, Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, X-File-Type, Cache-Control, Origin',
@@ -105,7 +75,7 @@ http.createServer((req,res)=>{
     return utils.resMock({req,res,resConfig,corsHeader}); // 处理mock结果
   }
   nhost=port?hostname+":"+port:hostname,
-  headers=Object.assign(deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{
+  headers=Object.assign(utils.deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{
     host:nhost,
     referer:(req.headers.referer||"").replace(req.headers.host,nhost)
   })
@@ -130,16 +100,16 @@ http.createServer((req,res)=>{
         return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
       }
       let headers=res2.headers;
-      headers=deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
-      headers=deletekey(headers,["last-modified","etag"]);//删除缓存相关
-      headers=deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
+      headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
+      headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
+      headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
       istextHtml=(res2.headers["content-type"]||"").includes("text/html")
       env.contentType=res2.headers["content-type"]||"";//设置content-type
       const beforfuncs=[confg.module&&plugins.moduleCode],
       afterfunc=[istextHtml&&plugins.insertInnerScript],
       filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
       // 加工响应数据
-      const execcontent=textcontent(res2.headers,env,filters);
+      const execcontent=utils.textcontent(res2.headers,env,filters);
       resStream.then(d=>{
         const resultdata=execcontent(d);
         res.writeHead(200,Object.assign(headers,resultdata.headers,corsHeader));

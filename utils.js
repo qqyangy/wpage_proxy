@@ -22,6 +22,38 @@ setValue=(target,obj={},keys=[])=>{
 },
 // 判断是否具备指定key
 iskeys=(obj={},keys=[])=>keys.some(k=>k in obj),
+//发送数据
+textcontent=(h,env,fncs)=>{
+  const iscode=/text|javascript|json/.test(h["content-type"]);
+  return (data)=>{
+      let result={body:data,headers:Object.assign({},h)};
+      if(iscode && fncs.length>0){
+        fncs.forEach(f=>{
+          const rdata=Buffer.isBuffer(result.body)?result.body.toString():result.body;
+          const d=f.call(result,rdata,result.headers,Object.assign({},env));
+          if(d!==undefined){
+            result.body=d;
+          }
+        });
+        // 标准化响应体
+        ({
+          object:()=>result.body=JSON.stringify(result.body),
+          function:()=>result.body=result.body.toString()
+        }[result.body && (typeof result.body)]||(()=>{}))();
+        !(result.headers&&result.headers.constructor===Object)&&(result.headers={});//如果headers不是对象则重置为空对象
+      }
+      return result;
+  }
+},
+//删除指定key
+deletekey=(o={},ks=[])=>{
+  ks.forEach(k=>{
+    if(Object.prototype.hasOwnProperty.call(o,k)){
+      delete o[k];
+    }
+  })
+  return o;
+},
 // 处理bodyFile配置
 setBodyFile=(target)=>{
   if(target.constructor===Object && target.bodyFile){
@@ -119,6 +151,8 @@ function formatResCfg(res,url,results,env){
   }[Object.prototype.toString.call(res)]||(()=>{}))()
 }
 module.exports={
+  textcontent,
+  deletekey,
   // 格式化url
   urlfromat(url="",protocol="http",prot=""){
     const httpreg=/^https?:\/\//,
