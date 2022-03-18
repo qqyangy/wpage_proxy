@@ -1,6 +1,7 @@
 const path=require("path"),
 fs=require("fs"),
 url=require("url"),
+child_process=require("child_process"),
 {MyWriteStream}=require("./MyStream.js");
 // 获取正确的headers格式
 const getObject=(d,env)=>{
@@ -24,11 +25,16 @@ iskeys=(obj={},keys=[])=>keys.some(k=>k in obj),
 // 处理bodyFile配置
 setBodyFile=(target)=>{
   if(target.constructor===Object && target.bodyFile){
+    const isNetSource=/^https?:\/\/\w+(?:\.[^.]+)+/.test(target.bodyFile)
+    if(isNetSource){
+      target.body=child_process.execSync(`curl ${target.bodyFile}`); //网络资源数据
+      return target;
+    }
     const pt=path.resolve(process.cwd(),target.bodyFile);
     if(!fs.existsSync(pt)){
       console.log(`指定的bodyFile：${target.bodyFile} 不存在!`);
     }else{
-      target.body=fs.readFileSync(pt);
+      target.body=fs.readFileSync(pt); // 本机文件数据
     }
   }
   return target;
@@ -83,7 +89,12 @@ function formatResCfg(res,url,results,env){
           return results.push(function(){
             setValue(this,res,configkeys);
             headers&&(this.headers=getObject(headers,env));//判断是否需要设置headers
-            return this.body=getBodyData(res.body,env);
+            if(res.bodyFile){
+              setBodyFile(this,res.bodyFile)
+            }else{
+              this.body=getBodyData(res.body,env)
+            }
+            return this.body;
           });
         case res.handler && res.handler.constructor===Function:
            // 使用handler处理
@@ -133,16 +144,17 @@ module.exports={
     formatResCfg(pcfg[key],url,resultfuncs,env); // 处理根配置
     formatResCfg(cfg[key],url,resultfuncs,env); // 处理对应域配置
     const mock="mockIndex" in resultfuncs;//是否为mock类型
+    const target={};
     return {
       mock,
-      [key]:mock && key==="res"?resultfuncs[resultfuncs.mockIndex].call({}):resultfuncs
+      [key]:mock && key==="res"?resultfuncs[resultfuncs.mockIndex].call(target)&&target:resultfuncs
     }
   },
   // 处理响应mock数据方法
-  resMock(res,resConfig){
+  resMock({req,res,resConfig,corsHeader}){
     const defaultContent=(t=>t.includes("charset")?t:`${t}; charset=utf-8`)((req.headers.accept||"").split(",").map(t=>t.trim())[0]||"text/plan"),
     body=resConfig.res.body,
-    isJson=typeof body === 'object';
+    isJson=!Buffer.isBuffer(resConfig.res.body) && typeof body === 'object';
     res.writeHead(200,Object.assign({"content-type":isJson?"application/json; charset=UTF-8":defaultContent},resConfig.res.headers||{},corsHeader));
     res.end(isJson?JSON.stringify(body):body);
   },

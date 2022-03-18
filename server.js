@@ -102,7 +102,7 @@ http.createServer((req,res)=>{
 
   const resConfig=utils.extractTrans(configall,confg,env)//获取配置中res项
   if(resConfig.mock){
-    return utils.resMock(res,resConfig); // 处理mock结果
+    return utils.resMock({req,res,resConfig,corsHeader}); // 处理mock结果
   }
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{

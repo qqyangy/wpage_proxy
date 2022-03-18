@@ -9,7 +9,7 @@ const servers=confgs.filter(o=>o.location).map((c,i)=>{
   server.stdout.on('data', (data) => {
     console.log(`服务${i}消息: ${data}`);
   });
-  server.stderr.on('data', (data) => {
+  server.stderr.on('error', (data) => {
     console.log(`服务${i}错误: ${data}`);
   });
   return server;
