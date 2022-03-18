@@ -46,13 +46,13 @@
       - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
     - `res` `:object|:function`
       - `:function`
-        - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
-        - 可通过需要修header时可设置`this.header`
-        - 需要调整响应数据时 可以`this.body` 或 `return newdata`;
+          - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
+          - 可通过需要修header时可设置`this.header`
+          - 需要调整响应数据时 可以`this.body` 或 `return newdata`;
       - `:object`
-        - `test` 添加生效条件配置方式同 `scripts.test`配置
-        - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
-        - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】
+          - `test` 添加生效条件配置方式同 `scripts.test`配置
+          - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
+          - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】
         - `body` `:function|:string|:json` 优先级2 【使用mock数据并不会向原服务器发送请求】
           - `:function`
             - 可接受一个参数 `env` 环境包
