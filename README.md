@@ -35,10 +35,10 @@
   - `serverPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `scripts` `:object` 要插入html的js脚本
-      - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
+    - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
         - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
         - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
-      - `数字key` `:object` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
+    - `数字key` `:object` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
         > content、file、url同时配置多个时生效优先级最高的
         - `content` `:string` 要插入的脚本内容 优先级3
         - `file` `:string` 本机文件相对于配置文件的相对路劲 也可使用绝对路劲 优先级2
