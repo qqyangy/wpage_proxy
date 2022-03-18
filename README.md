@@ -61,7 +61,11 @@
         - `handler` `:function` 对真实的象印数据处理 同res直接配置为函数的形式
     - `req` `:object|:function`
       - `:function` 同res的函数配置形式
-      - `test/headers/bodyFile/body/handler` 同res
+      - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
       - `statusCode` `:number` 配置显示的状态码
+      - `path` `:string` 配置修改源服务器路径 比如 希望请求a接口却返回b接口数据
+      - `query` `:string|:object` 配置调整请求原url的参数部分
+      - `hash` `:string` 调整请求时hash 正常情况没什么用
+      - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
 
   
