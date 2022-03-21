@@ -53,9 +53,10 @@ module.exports={
       localPort:5200,
       scripts:{
         test:"/referral/invite_relation.vpage",
-        1:{content:`console.log("以content方式注入")`,attrs:""},
-        7:{file:"./file2.txt",attrs:""},
-        0:{url:"http://127.0.0.1:5501/a.js",attrs:'defer="defer"'},
+        0:"http://localhost:8231/target/target-script-min.js#anonymous"
+        // 1:{content:`console.log("以content方式注入")`,attrs:""},
+        // 7:{file:"./file2.txt",attrs:""},
+        // 0:{url:"http://127.0.0.1:5501/a.js",attrs:'defer="defer"'},
       },
       // res:{
       //   // test:"/referral/invite_relation.vpage",
