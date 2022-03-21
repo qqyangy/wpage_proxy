@@ -40,7 +40,7 @@ insertScript=(html,keys=[],obj,endmark)=>{
 filterUrl=()=>{
   return (url="")=>{
     const index=hosts.findIndex(d=>url.includes(d.host));
-    return index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].localPort}`):url;
+    return index!==-1?url.replace(hosts[index].host,index===0?location.origin:`http://${hosts[index].localIp}:${hosts[index].localPort}`):url;
   }
 },
 //设置xhr
@@ -81,12 +81,12 @@ const plugins={
     })()</script>`);
   },
   // 处理配置项的module字段
-  moduleCode(text,h,{hosts,hostName,oldOrigin,contentType,url}){
+  moduleCode(text,h,{hosts,localIp,contentType,url}){
     if(/html|javascript/.test(contentType)){
       hosts.forEach(o=>{
         let i=0;
         while((i=text.indexOf(o.host,i))!==-1){
-          text=text.replace(o.host,`http://${hostName}:${o.localPort}`);
+          text=text.replace(o.host,`http://${localIp}:${o.localPort}`);
         }
       })
     }

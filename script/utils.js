@@ -98,6 +98,21 @@ mergeReqOptions=(optins,reqdt)=>{
   if(isheaders){
     nOptins.headers=Object.assign({},nOptins.headers,reqdt.headers)
   }
+},
+// 获取本机ip
+getIPAddress=()=>{
+  if(getIPAddress.ip) return getIPAddress.ip;
+  var interfaces = require('os').networkInterfaces();
+  for(var devName in interfaces){
+      var iface = interfaces[devName];
+      for(var i=0;i<iface.length;i++){
+          var alias = iface[i];
+          if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal){
+              return getIPAddress.ip=alias.address;
+          }
+      }
+  }
+  return getIPAddress.ip="localhost";
 };
 
 const configkeys=["path","query","hash","method","bodyFile","statusCode"];//需要统一处理的配置项
@@ -153,8 +168,9 @@ function formatResCfg(res,url,results,env){
 module.exports={
   textcontent,
   deletekey,
+  getIPAddress,
   // 格式化url
-  urlfromat(url="",protocol="http",prot=""){
+  urlformat(url="",protocol="http",prot=""){
     const httpreg=/^https?:\/\//,
     protreg=/:\d+$/;
     if(!httpreg.test(url)){

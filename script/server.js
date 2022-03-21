@@ -20,6 +20,7 @@ confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=
   })
 })
 const confg=confgs[index],//获取当前配置
+localIp=utils.getIPAddress(),//获取本机ip
 hosts=confgs.map((o,i)=>{
   const domain=url.parse(o.server||"http:localhost:3001"),
   {port="",hostname=""}=domain,
@@ -30,6 +31,7 @@ hosts=confgs.map((o,i)=>{
     hostname,
     port,
     host:port?`${protocol}://${hostname}:${port}`:`${protocol}://${hostname}`,
+    localIp,
     localPort
   };
 }),
@@ -64,9 +66,10 @@ http.createServer((req,res)=>{
     path:req.url,
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
-      return utils.urlfromat(t,"http",localPort);
+      return utils.urlformat(t,"http",localPort);
     })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
-    hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
+    localIp,
+    hostName:url.parse(utils.urlformat(req.headers.host||req.headers.origin)).hostname,
     hosts
   };
 
