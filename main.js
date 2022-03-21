@@ -3,7 +3,7 @@ path=require("path");
 const configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy);
 const servers=confgs.filter(o=>o.server).map((c,i)=>{
-  const server=child_process.exec(`node ${path.resolve(__dirname,"./server.js")} ${i}`,(error, stdout, stderr)=>{
+  const server=child_process.exec(`node ${path.resolve(__dirname,"./script/server.js")} ${i}`,(error, stdout, stderr)=>{
     console.log("启动服务:",i);
   });
   server.stdout.on('data', (data) => {
