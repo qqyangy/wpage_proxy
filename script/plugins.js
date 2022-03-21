@@ -98,7 +98,12 @@ const plugins={
       const isstr=typeof scripts.test === "string",
       isreg=!isstr && scripts.test instanceof RegExp;
       if(!(isstr && url.includes(scripts.test) || isreg && scripts.test.test(url))) return text;
-      const skeys=Object.keys(scripts).map(n=>Number(n)).filter(n=>!Number.isNaN(n)).filter(k=>(scripts[k] && scripts[k].constructor===Object));
+      const numkeys=Object.keys(scripts).map(n=>Number(n)).filter(n=>!Number.isNaN(n));
+      numkeys.forEach(n=>{
+        const o=scripts[n];
+        return o && typeof o ==="string" && /^https?:\/\/\w+?/.test(o) && (scripts[n]={url:o});//转换直接url为对象url属性
+      });
+      const skeys=numkeys.filter(k=>(scripts[k] && scripts[k].constructor===Object));
       const headn=skeys.filter(n=>n>=0&&n<100).sort((a,b)=>a-b),
       bodyn=skeys.filter(n=>n>=100).sort((a,b)=>a-b);
       headn.length>0 && (text=text.replace(/<head\b[\W\w]*<\/head>/,htext=>insertScript(htext,headn,scripts,"</head>")));
