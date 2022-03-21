@@ -28,11 +28,11 @@
 
 ### 配置项明细
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量
-- `serverPort` `:number` 全局配置端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
+- `localPort` `:number` 全局配置端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
-  - `location` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
-  - `serverPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
+  - `server` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
+  - `localPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `scripts` `:object` 要插入html的js脚本
     - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url

@@ -40,7 +40,7 @@ insertScript=(html,keys=[],obj,endmark)=>{
 filterUrl=()=>{
   return (url="")=>{
     const index=hosts.findIndex(d=>url.includes(d.host));
-    return index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].serverPort}`):url;
+    return index!==-1?url.replace(hosts[index].host,`${location.protocol}//${location.hostname}:${hosts[index].localPort}`):url;
   }
 },
 //设置xhr
@@ -86,7 +86,7 @@ const plugins={
       hosts.forEach(o=>{
         let i=0;
         while((i=text.indexOf(o.host,i))!==-1){
-          text=text.replace(o.host,`http://${hostName}:${o.serverPort}`);
+          text=text.replace(o.host,`http://${hostName}:${o.localPort}`);
         }
       })
     }

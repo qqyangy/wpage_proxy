@@ -11,8 +11,8 @@ stream=require("stream"),
 
 const index=process.argv[2] || 0, // 获取配置索引
 configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
-defaultServerPort=configall.serverPort||9200,
-confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.location).map(o=>(!/^\w+:\/\//.test(o.location)&&(o.location='http://'+o.location),o)); //获取全部配置
+defaultlocalPort=configall.localPort||9200,
+confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
 //配置可继承属性
 ["cookie","module"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
@@ -21,19 +21,19 @@ confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.location).map(
 })
 const confg=confgs[index],//获取当前配置
 hosts=confgs.map((o,i)=>{
-  const domain=url.parse(o.location||"http:localhost:3001"),
+  const domain=url.parse(o.server||"http:localhost:3001"),
   {port="",hostname=""}=domain,
   protocol=(domain.protocol||"http").replace(":",""),
-  serverPort=o.serverPort||(defaultServerPort+Number(i));//服务端
+  localPort=o.localPort||(defaultlocalPort+Number(i));//服务端
   return {
     protocol,
     hostname,
     port,
     host:port?`${protocol}://${hostname}:${port}`:`${protocol}://${hostname}`,
-    serverPort
+    localPort
   };
 }),
-{port,hostname,protocol,serverPort}=hosts[index];// 获取对饮篇日志
+{port,hostname,protocol,localPort}=hosts[index];// 获取对饮篇日志
 
 
 const corsHeader={
@@ -64,7 +64,7 @@ http.createServer((req,res)=>{
     path:req.url,
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
-      return utils.urlfromat(t,"http",serverPort);
+      return utils.urlfromat(t,"http",localPort);
     })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
     hostName:url.parse(utils.urlfromat(req.headers.host||req.headers.origin)).hostname,
     hosts
@@ -120,6 +120,6 @@ http.createServer((req,res)=>{
     reqs2.end(reqdata);
   })
 
-}).listen(serverPort);
+}).listen(localPort);
 
-console.log("服务启动:",serverPort,confg.location)
+console.log("服务启动:",localPort,confg.server)
