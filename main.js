@@ -1,6 +1,11 @@
 const child_process=require("child_process"),
-path=require("path");
-const configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
+path=require("path"),
+fs=require("fs");
+const configpath=path.resolve(process.cwd(),"./proxy.config.js");
+if(!fs.existsSync(configpath)){
+  return console.log("配置文件：proxy.config.js 不存在,请先创建配置在运行命令");
+}
+const configall=require(configpath),
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy);
 const servers=confgs.filter(o=>o.server).map((c,i)=>{
   const server=child_process.exec(`node ${path.resolve(__dirname,"./script/server.js")} ${i}`,(error, stdout, stderr)=>{
