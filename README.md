@@ -30,9 +30,11 @@
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
+- `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
   - `server` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
   - `localPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
+  - `proxyLocation` `:boolean` 是否代理location 不配置时使用递增形式继承全局
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `scripts` `:object` 要插入html的js脚本
     - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
@@ -44,7 +46,7 @@
         - `file` `:string` 本机文件相对于配置文件的相对路劲 也可使用绝对路劲 优先级2
         - `url` `:sting` 网络资源地址`协议://域名[:宽口][:路径][:参数]` 优先级1
         - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
-    - `res` `:object|:function`
+    - `res` `:object|:function|:array`
       - `:function`
           - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
           - 可通过需要修header时可设置`this.header`
@@ -59,7 +61,8 @@
               - return 值为响应数据
           - `:string|:json` 使用指定的数据响应
         - `handler` `:function` 对真实的象印数据处理 同res直接配置为函数的形式
-    - `req` `:object|:function`
+      - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
+    - `req` `:object|:function|:array`
       - `:function` 同res的函数配置形式
       - `:object`
           - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
@@ -68,5 +71,6 @@
           - `query` `:string|:object` 配置调整请求原url的参数部分
           - `hash` `:string` 调整请求时hash 正常情况没什么用
           - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
+      - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
 
   

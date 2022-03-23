@@ -102,7 +102,7 @@ creatLocation=()=>{
             return isreset?getval[k]:location[k];
           },
           set(v){
-            return isreset?(setval(v)):(location[k]=v);
+            return isreset?(setval[k](v)):(location[k]=v);
           }
         }
       }
@@ -137,12 +137,12 @@ const plugins={
     })()</script>`);
   },
   // 处理配置项的module字段
-  moduleCode(text,h,{hosts,localIp,contentType,url}){
+  moduleCode(text,h,{hosts,localIp,contentType,newOrigin}){
     if(/html|javascript/.test(contentType)){
-      hosts.forEach(o=>{
+      hosts.forEach((o,index)=>{
         let i=0;
         while((i=text.indexOf(o.host,i))!==-1){
-          text=text.replace(o.host,`http://${localIp}:${o.localPort}`);
+          text=text.replace(o.host,index===0?newOrigin:`http://${localIp}:${o.localPort}`);
         }
       })
     }

@@ -182,7 +182,7 @@ module.exports={
       if(!protreg.test(url)){
         url=`${url}:${prot}`
       }else{
-        url=url.replace(/:\d+$/,prot);
+        url=url.replace(/:\d+$/,`:${prot}`);
       }
     }
     return url;;
