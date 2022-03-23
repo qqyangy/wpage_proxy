@@ -14,7 +14,7 @@ configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultlocalPort=configall.localPort||9200,
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
 //配置可继承属性
-["cookie","module"].forEach(k=>{
+["cookie","module","proxyLocation"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
     !o.hasOwnProperty(k) && (o[k]=configall[k]);
   })
@@ -64,6 +64,7 @@ http.createServer((req,res)=>{
   const env={
     url:options.url,
     path:req.url,
+    proxyLocation:confg.proxyLocation,
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
       return utils.urlformat(t,"http",localPort);
@@ -108,7 +109,7 @@ http.createServer((req,res)=>{
       headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
       istextHtml=(res2.headers["content-type"]||"").includes("text/html")
       env.contentType=res2.headers["content-type"]||"";//设置content-type
-      const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode],
+      const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.proxyLocation],
       afterfunc=[istextHtml&&plugins.insertInnerScript],
       filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
       // 加工响应数据

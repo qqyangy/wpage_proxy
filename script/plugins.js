@@ -56,6 +56,61 @@ xhrTxt=()=>{
     }
   }
 },
+// 设置location
+creatLocation=()=>{
+  return ()=>{
+    const loc=window.proxyLocation={};
+    loc.__proto__=location.__proto__;
+    const pagehost=hosts[0],
+    getval={
+      host:pagehost.hostname.replace(/(:\d+)?$/,pagehost.port?`:${pagehost.port}`:""),
+      hostname:pagehost.hostname,
+      href:location.href.replace(location.origin,pagehost.host),
+      origin:pagehost.host,
+      port:pagehost.port,
+      protocol:pagehost.protocol
+    },
+    setval={
+      host(v){
+        return location.host=v.replace(getval.host,location.host);
+      },
+      hostname(v){
+        return location.hostname=v.replace(getval.hostname,location.hostname);
+      },
+      href(v){
+        return location.href=v.replace(getval.origin,location.origin);
+      },
+      origin(v){
+        return location.origin=v.replace(getval.origin,location.origin);
+      },
+      port(v){
+        return location.port=v.replace(getval.port,location.origin);
+      },
+      protocol(v){
+        return location.protocol=v.replace(getval.protocol,location.protocol);
+      }
+    };
+    lKeys=Object.keys(location),
+    opt=lKeys.reduce((o,k)=>{
+      const v=location[k];
+      if(typeof v === "function"){
+        loc[k]=v.bind(location);
+      }else{
+        const isreset=Object.prototype.hasOwnProperty.call(getval,k);
+        o[k]={
+          get(){
+            return isreset?getval[k]:location[k];
+          },
+          set(v){
+            return isreset?(setval(v)):(location[k]=v);
+          }
+        }
+      }
+      return o;
+    },{});
+    Object.defineProperties(window.proxyLocation,opt);
+  }
+}
 //设置css与js
 cssAndJstxt=()=>{
   return ()=>{
@@ -72,10 +127,11 @@ cssAndJstxt=()=>{
 };
 const plugins={
   //插入代码
-  insertInnerScript(html="",h,{hosts}){
+  insertInnerScript(html="",h,{hosts,proxyLocation}){
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
       filterUrl=${filterUrl().toString()};
+      ${proxyLocation?`(${creatLocation().toString()})();`:""}
       (${xhrTxt().toString()})();
       (${cssAndJstxt().toString()})();
     })()</script>`);
@@ -91,6 +147,10 @@ const plugins={
       })
     }
     return text;
+  },
+  // 处理浏览器location
+  relocation(text,h,{contentType}){
+    return /html|javascript/.test(contentType)?text.replace(/\blocation\b/gm,"proxyLocation"):text;
   },
   //向html中添加js脚本
   addScripts(scripts,text,h,{contentType,url}){
