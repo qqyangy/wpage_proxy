@@ -99,9 +99,9 @@ http.createServer((req,res)=>{
     const resStream=new MyWriteStream();//响应数据中转流
     // 发起请求
     const reqs2=request(reqOptions,(err,res2)=>{
-      if(err || res2.statusCode >= 500){
-        res.writeHead(500,{});//删除csp限制
-        return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
+      if(err || res2 && res2.statusCode >= 500){
+        res.writeHead((!err&&res2 && res2.statusCode)||500,{});
+        return res.end(err&&err.toString&&err.toString()||res2&&res2.statusCode);
       }
       let headers=res2.headers;
       if(index==0 && !headers["content-type"]){
