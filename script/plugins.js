@@ -154,7 +154,7 @@ const plugins={
   },
   //向html中添加js脚本
   addScripts(scripts,text,h,{contentType,url}){
-    if(contentType && contentType.includes("html") && scripts && scripts.constructor===Object && scripts.test){
+    if(contentType && contentType.includes("html") && text && /<html/i.test(text) && scripts && scripts.constructor===Object && scripts.test){
       const isstr=typeof scripts.test === "string",
       isreg=!isstr && scripts.test instanceof RegExp;
       if(!(isstr && url.includes(scripts.test) || isreg && scripts.test.test(url))) return text;

@@ -104,12 +104,15 @@ http.createServer((req,res)=>{
         return res.end(data||err&&err.toString()||res2&&res2.statusCode||500);
       }
       let headers=res2.headers;
+      if(index==0 && !headers["content-type"]){
+        headers["content-type"]="text/html; charset=UTF-8"; //处理第一个服务无contentType
+      }
       headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
       headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
       headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
-      istextHtml=(res2.headers["content-type"]||"").includes("text/html")
-      env.contentType=res2.headers["content-type"]||"";//设置content-type
-      const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.proxyLocation],
+      istextHtml=(headers["content-type"]||"").includes("text/html")
+      env.contentType=headers["content-type"]||"";//设置content-type
+      const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.relocation],
       afterfunc=[istextHtml&&plugins.insertInnerScript],
       filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
       // 加工响应数据
