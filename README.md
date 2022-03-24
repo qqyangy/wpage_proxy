@@ -24,8 +24,37 @@
 
 ### 安装
 ```sh
-echo 10;
+# 克隆项目
+git clone http://gitlab.17zuoye.net:10080/yong.yang/wpage_proxy.git
 
+# 进入项目文件夹
+cd wpage_proxy
+
+# 安装依赖及运行命令
+npm run i
+
+# 进入工作目录
+cd /xxx/xxx/xxx/
+
+# 创建配置文件 并写入nodejs 模块得导出代码
+echo "module.exports={}" > proxy.config.js
+
+# 使用开发工具打开配置文件 在{}中完善配置，配置方式参照配置项明细
+
+# 运行代理程序 （在配置文档所在目录直接运行命令  或 在运行命令后带配置文件的目录位置参数）
+wpage_proxy
+
+```
+### 基础文档示例
+
+```js
+module.exports={
+  proxyLocation:true,//是否代理浏览器location
+  proxy:{
+    server:"https://www.17zuoye.com",
+    cookie:"uid=sddfkxx.xxxxxxx."
+  }
+}
 ```
 
 ### 使用方式
