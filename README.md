@@ -45,17 +45,6 @@ echo "module.exports={}" > proxy.config.js
 wpage_proxy
 
 ```
-### 基础文档示例
-
-```js
-module.exports={
-  proxyLocation:true,//是否代理浏览器location
-  proxy:{
-    server:"https://www.17zuoye.com",
-    cookie:"uid=sddfkxx.xxxxxxx."
-  }
-}
-```
 
 ### 使用方式
 - 1.添加配置文件 `proxy.config.js`
@@ -107,5 +96,17 @@ module.exports={
           - `hash` `:string` 调整请求时hash 正常情况没什么用
           - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
       - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
+
+### 基础文档示例
+
+```js
+module.exports={
+  proxyLocation:true,//是否代理浏览器location
+  proxy:{
+    server:"https://www.17zuoye.com",
+    cookie:"uid=sddfkxx.xxxxxxx."
+  }
+}
+```
 
   
