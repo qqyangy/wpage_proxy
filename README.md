@@ -103,8 +103,8 @@ wpage_proxy
 module.exports={
   proxyLocation:true,//是否代理浏览器location
   proxy:{
-    localPort:5200,
     server:"https://www.17zuoye.com",
+    localPort:5200,
     cookie:"uid=sddfkxx.xxxxxxx."
   }
 }
