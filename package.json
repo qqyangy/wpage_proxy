@@ -8,7 +8,7 @@
     "start": "node main.js",
     "weinre-i": "npm instll weinre -g",
     "weinre":"weinre --httpPort 8231",
-    "insert":"sh ./bin/install.sh"
+    "i":"npm install && sh ./bin/install.sh"
   },
   "author": "yong.yang",
   "license": "ISC",
