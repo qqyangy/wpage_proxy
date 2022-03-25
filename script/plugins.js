@@ -37,14 +37,12 @@ insertScript=(html,keys=[],obj,endmark)=>{
   return lastScripts?nhtml.replace(endmark,`${lastScripts}${endmark}`):nhtml;
 },
 //过滤加工url
-filterUrl=()=>{
-  return (url1="")=>{
+filterUrl=(url1="")=>{
     const url=remapUrl(url1);
     const index=hosts.findIndex(d=>url.includes(d.host));
     return index!==-1?url.replace(hosts[index].host,index===0?location.origin:`http://${hosts[index].localIp}:${hosts[index].localPort}`):url;
-  }
 },
-createMapUrl=()=>mps=>{
+createMapUrl=mps=>{
   const mapurls=hosts.map((o,i)=>{
     return [i===0?location.origin:`http://${o.localIp}:${localPort}`,o.host];
   });
@@ -60,7 +58,6 @@ createMapUrl=()=>mps=>{
 },
 //设置xhr
 xhrTxt=()=>{
-  return ()=>{
     const wpage_proxy_fetch=window.fetch,
     wpage_proxy_open=XMLHttpRequest.prototype.open,
     wpage_proxy_WebSocket=window.WebSocket,
@@ -77,11 +74,9 @@ xhrTxt=()=>{
     wpage_proxy_EventSource&&(window.EventSource=function EventSource(url,...p){
       return new wpage_proxy_EventSource(filterUrl(url),...p);
     })
-  }
 },
 // 设置location
 creatLocation=()=>{
-  return ()=>{
     const loc=window.proxyLocation={};
     loc.__proto__=location.__proto__;
     const pagehost=hosts[0],
@@ -132,11 +127,9 @@ creatLocation=()=>{
       return o;
     },{});
     Object.defineProperties(window.proxyLocation,opt);
-  }
 }
 //设置css与js
 cssAndJstxt=()=>{
-  return ()=>{
     const appendChild2=HTMLElement.prototype.appendChild;
     HTMLElement.prototype.appendChild=function appendChild(dom,...p){
       if(dom instanceof HTMLScriptElement && dom.src){
@@ -146,7 +139,6 @@ cssAndJstxt=()=>{
       }
       return appendChild2.call(this,dom,...p);
     }
-  }
 },
 // 包括函数的数组转字符串
 fucArry2text=(ary)=>{
@@ -160,11 +152,11 @@ const plugins={
   insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl}){
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
-      remapUrl=${mapUrl.length?`(${createMapUrl().toString()})(${fucArry2text(mapUrl)})`:"u=>u"};
-      const filterUrl=${filterUrl().toString()};
-      ${proxyLocation?`(${creatLocation().toString()})();`:""}
-      (${xhrTxt().toString()})();
-      (${cssAndJstxt().toString()})();
+      remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>u"};
+      const filterUrl=${filterUrl.toString()};
+      ${proxyLocation?`(${creatLocation.toString()})();`:""}
+      (${xhrTxt.toString()})();
+      (${cssAndJstxt.toString()})();
     })()</script>`);
   },
   // 处理配置项的module字段
