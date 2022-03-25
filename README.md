@@ -55,6 +55,12 @@ wpage_proxy
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
+- `mapUrl` `:array|:array二维` 配置请求url重置映射 【全局配置】
+  - `:array` 只有一组时可使用
+    - 第一个值`:string|:regexp` 分别使用`array[0].includes(url)`和`array[0].test(url)` 验证是否应用当前规则
+    - 第二个值 `:function` 第一个参数元素url、第二个参数代理服务与元素服务的映射数组hosts 函数的返回值作为修改后的url使用
+    - 第三个值 `:boolean` 非必须 默认false 新的url是否直接使用原始服务（跳过代理服务）
+  - `:array二维` 如果需要使用多条规则时使用二位数组 其中item与单数组匹配规则一致
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
   - `server` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
   - `localPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
@@ -102,10 +108,11 @@ wpage_proxy
 ```js
 module.exports={
   proxyLocation:true,//是否代理浏览器location
+  mapUrl:["__webpack_hmr",()=>"http://localhost:3010/__webpack_hmr",true],//监听热更新的服务使用原服务（不走代理）
   proxy:{
-    server:"https://www.17zuoye.com",
-    localPort:5200,
-    cookie:"uid=sddfkxx.xxxxxxx."
+    server:"http://localhost:3010",// 代理本地开发服务
+    localPort:5200, //代理服务端口
+    cookie:"uid=sddfkxx.xxxxxxx." // cookie
   }
 }
 ```
