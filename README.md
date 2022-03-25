@@ -55,6 +55,7 @@ wpage_proxy
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
+- `keepInsert` `:boolean` 是否保留浏览器注入代码 默认false 【可被继承】
 - `mapUrl` `:array|:array二维` 配置请求url重置映射 【全局配置】
   - `:array` 只有一组时可使用
       - 第一个值`:string|:regexp` 分别使用`array[0].includes(url)`和`array[0].test(url)` 验证是否应用当前规则
