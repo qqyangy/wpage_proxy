@@ -103,6 +103,18 @@ wpage_proxy
           - `method` `:sting` 调整修改请求方式 `get|post|head|put|delete` 大小写不限
       - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
 
+### env 包属性
+  - `url` 通过代理请求的新url
+  - `ourl` 原始请求url
+  - `path` path及请求参数部分
+  - `proxyLocation` proxyLocation配置项
+  - `mapUrl` mapUrl配置项
+  - `oldOrigin` 原请求域名（包含协议和端口）
+  - `newOrigin` 通过代理请求域名（包含协议和端口）
+  - `localIp` 代理服务器id地址
+  - `hostName` 浏览器使用的域名（不包含协议及端口）
+  - `hosts` 代理组域名映射信息
+
 ### 基础文档示例
 
 ```js
