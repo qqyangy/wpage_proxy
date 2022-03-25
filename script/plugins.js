@@ -151,10 +151,14 @@ fucArry2text=(ary)=>{
   return keymamfuncs.reduce((s,a)=>{
     return s.replace(`"${a[0]}"`,a[1].toString());
   },sary);
-};
+},
+deletInsertCode=()=>{
+  document.scripts[0].parentNode.removeChild(document.scripts[0]);// 移除支持的script标签
+}
 const plugins={
   //插入代码
-  insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl}){
+  insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl,keepInsert}){
+    console.log(keepInsert);
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
       remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>({url:u,skip:false})"};
@@ -162,6 +166,7 @@ const plugins={
       ${proxyLocation?`(${creatLocation.toString()})();`:""}
       (${xhrTxt.toString()})();
       (${cssAndJstxt.toString()})();
+      ${!keepInsert?`(${deletInsertCode.toString()})()`:""}
     })()</script>`);
   },
   // 处理配置项的module字段

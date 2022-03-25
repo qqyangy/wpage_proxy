@@ -14,7 +14,7 @@ configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultlocalPort=configall.localPort||9200,
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
 //配置可继承属性
-["cookie","module","proxyLocation"].forEach(k=>{
+["cookie","module","proxyLocation","keepInsert"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
     !o.hasOwnProperty(k) && (o[k]=configall[k]);
   })
@@ -62,6 +62,7 @@ http.createServer((req,res)=>{
   };
   //定制环境数据
   const env={
+    keepInsert:!!confg.keepInsert,
     url:options.url,
     ourl:hosts[index].host+req.url,
     path:req.url,
