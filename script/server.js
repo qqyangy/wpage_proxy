@@ -5,7 +5,7 @@ path=require("path"),
 url=require("url"),
 plugins=require("./plugins.js"),
 utils=require("./utils.js"),
-stream=require("stream"),
+mimes=require("./mime.config.js"),
 {MyWriteStream}=require("./MyStream.js");
 
 
@@ -109,8 +109,10 @@ http.createServer((req,res)=>{
         return res.end(err&&err.toString&&err.toString()||res2&&res2.statusCode);
       }
       let headers=res2.headers;
-      if(index==0 && !headers["content-type"]){
-        headers["content-type"]="text/html; charset=UTF-8"; //处理第一个服务无contentType
+      if(!headers["content-type"]){
+        const ext=(/\.\w+$/.exec(req.url.split("?")[0].split("#")[0])||[""])[0].replace(".",""),// 获取文件后缀
+        vcontent=ext&&mimes[ext]||index==0&&"text/html; charset=UTF-8";
+        vcontent&&(headers["content-type"]=vcontent); //处理默认contentType
       }
       headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
       headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
