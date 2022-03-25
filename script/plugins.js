@@ -38,7 +38,8 @@ insertScript=(html,keys=[],obj,endmark)=>{
 },
 //过滤加工url
 filterUrl=(url1="")=>{
-    const url=remapUrl(url1);
+    const {url,skip}=remapUrl(url1);
+    if(skip){ return url;} ;//判断是否需要跳过代理
     const index=hosts.findIndex(d=>url.includes(d.host));
     return index!==-1?url.replace(hosts[index].host,index===0?location.origin:`http://${hosts[index].localIp}:${hosts[index].localPort}`):url;
 },
@@ -52,8 +53,8 @@ createMapUrl=mps=>{
     return mps.filter(a=>{
       return a.length>1 && typeof a[1]==="function" && (typeof a[0]==="string" && ourl.includes(a[0]) || a[0].constructor===RegExp && a[0].test(ourl));
     }).reduce((r,a)=>{
-      return a[1](r);
-    },ourl);
+      return {url:a[1](r.url,hosts),skip:!!a[2]};
+    },{url:ourl,skip:false});
   }
 },
 //设置xhr
@@ -142,9 +143,13 @@ cssAndJstxt=()=>{
 },
 // 包括函数的数组转字符串
 fucArry2text=(ary)=>{
-  const sary=JSON.stringify(ary,(k,v)=>v instanceof Function?"json-string-to-function-reduction":v);
-  return ary.reduce((s,a)=>{
-    return a.length>1 && a[1] instanceof Function?s.replace('"json-string-to-function-reduction"',a[1].toString()):s;
+  const keymamfuncs=[];
+  const sary=JSON.stringify(ary,(k,v)=>v instanceof Function?(()=>{
+    const k=`json-string-to-function-num${keymamfuncs.length}-reduction`;
+    return keymamfuncs.push([k,v]),k;
+  })():v);
+  return keymamfuncs.reduce((s,a)=>{
+    return s.replace(`"${a[0]}"`,a[1].toString());
   },sary);
 };
 const plugins={
@@ -152,7 +157,7 @@ const plugins={
   insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl}){
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
-      remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>u"};
+      remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>({url:u,skip:false})"};
       const filterUrl=${filterUrl.toString()};
       ${proxyLocation?`(${creatLocation.toString()})();`:""}
       (${xhrTxt.toString()})();

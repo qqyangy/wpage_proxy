@@ -67,7 +67,7 @@ http.createServer((req,res)=>{
     proxyLocation:confg.proxyLocation,
     mapUrl:(v=>{
       return v && v instanceof Array && (v.length>0 && !(v[0] instanceof Array)?[v]:v) || [];
-    })(configall.mapUrl),
+    })(configall.mapUrl).filter(a=>a.length>1).map(a=>a.length>3?a.splice(0,3):a),
     oldOrigin:hosts[index].host,
     newOrigin:(t=>{
       return utils.urlformat(t,"http",localPort);
