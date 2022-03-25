@@ -63,6 +63,7 @@ http.createServer((req,res)=>{
   //定制环境数据
   const env={
     url:options.url,
+    ourl:hosts[index].host+req.url,
     path:req.url,
     proxyLocation:confg.proxyLocation,
     mapUrl:(v=>{
