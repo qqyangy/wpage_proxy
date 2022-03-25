@@ -2,6 +2,9 @@ module.exports={
   localPort:9200,//默认开始端口
   module:true,//是否处理es6模块
   proxyLocation:true,//是否代理浏览器location
+  mapUrl:[
+    ["user.vpage",()=>"http://www.baidu.com"]
+  ],
   proxy2:[
     {
       server:"parent.test.17zuoye.net",

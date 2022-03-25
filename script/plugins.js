@@ -38,22 +38,45 @@ insertScript=(html,keys=[],obj,endmark)=>{
 },
 //过滤加工url
 filterUrl=()=>{
-  return (url="")=>{
+  return (url1="")=>{
+    const url=remapUrl(url1);
     const index=hosts.findIndex(d=>url.includes(d.host));
     return index!==-1?url.replace(hosts[index].host,index===0?location.origin:`http://${hosts[index].localIp}:${hosts[index].localPort}`):url;
+  }
+},
+createMapUrl=()=>mps=>{
+  const mapurls=hosts.map((o,i)=>{
+    return [i===0?location.origin:`http://${o.localIp}:${localPort}`,o.host];
+  });
+  return url=>{
+    const ou=mapurls.find(a=>url.includes(a[0]))||["",""], //提取原始origin
+    ourl=url.replace(ou[0],ou[1]);//还原url
+    return mps.filter(a=>{
+      return a.length>1 && typeof a[1]==="function" && (typeof a[0]==="string" && ourl.includes(a[0]) || a[0].constructor===RegExp && a[0].test(ourl));
+    }).reduce((r,a)=>{
+      return a[1](r);
+    },ourl);
   }
 },
 //设置xhr
 xhrTxt=()=>{
   return ()=>{
-    const myfetch=window.fetch,
-    myopen=XMLHttpRequest.prototype.open;
+    const wpage_proxy_fetch=window.fetch,
+    wpage_proxy_open=XMLHttpRequest.prototype.open,
+    wpage_proxy_WebSocket=window.WebSocket,
+    wpage_proxy_EventSource=window.EventSource
     window.fetch=function fetch(url,...p){
-      return myfetch(filterUrl(url),...p);
+      return wpage_proxy_fetch(filterUrl(url),...p);
     }
     XMLHttpRequest.prototype.open=function open(type,url,...p){
-      return myopen.call(this,type,filterUrl(url),...p);
+      return wpage_proxy_open.call(this,type,filterUrl(url),...p);
     }
+    wpage_proxy_WebSocket&&(window.WebSocket=function WebSocket(url,...p){
+      return new wpage_proxy_WebSocket(filterUrl(url),...p);
+    })
+    wpage_proxy_EventSource&&(window.EventSource=function EventSource(url,...p){
+      return new wpage_proxy_EventSource(filterUrl(url),...p);
+    })
   }
 },
 // 设置location
@@ -124,13 +147,21 @@ cssAndJstxt=()=>{
       return appendChild2.call(this,dom,...p);
     }
   }
+},
+// 包括函数的数组转字符串
+fucArry2text=(ary)=>{
+  const sary=JSON.stringify(ary,(k,v)=>v instanceof Function?"json-string-to-function-reduction":v);
+  return ary.reduce((s,a)=>{
+    return a.length>1 && a[1] instanceof Function?s.replace('"json-string-to-function-reduction"',a[1].toString()):s;
+  },sary);
 };
 const plugins={
   //插入代码
-  insertInnerScript(html="",h,{hosts,proxyLocation}){
+  insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl}){
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
-      filterUrl=${filterUrl().toString()};
+      remapUrl=${mapUrl.length?`(${createMapUrl().toString()})(${fucArry2text(mapUrl)})`:"u=>u"};
+      const filterUrl=${filterUrl().toString()};
       ${proxyLocation?`(${creatLocation().toString()})();`:""}
       (${xhrTxt().toString()})();
       (${cssAndJstxt().toString()})();
