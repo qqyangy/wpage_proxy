@@ -158,7 +158,6 @@ deletInsertCode=()=>{
 const plugins={
   //插入代码
   insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl,keepInsert}){
-    console.log(keepInsert);
     return html.replace("<head>",`<head><script>(()=>{
       const hosts=${JSON.stringify(hosts)},
       remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>({url:u,skip:false})"};
