@@ -45,7 +45,7 @@ filterUrl=(url1="")=>{
 },
 createMapUrl=mps=>{
   const mapurls=hosts.map((o,i)=>{
-    return [i===0?location.origin:`http://${o.localIp}:${localPort}`,o.host];
+    return [i===0?location.origin:`http://${o.localIp}:${o.localPort}`,o.host];
   });
   return url=>{
     const ou=mapurls.find(a=>url.includes(a[0]))||["",""], //提取原始origin
