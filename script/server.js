@@ -14,7 +14,7 @@ configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
 defaultlocalPort=configall.localPort||9200,
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
 //配置可继承属性
-["cookie","module","proxyLocation","keepInsert"].forEach(k=>{
+["cookie","module","proxyLocation","keepInsert","setCookie"].forEach(k=>{
   configall.hasOwnProperty(k) && confgs.forEach(o=>{
     !o.hasOwnProperty(k) && (o[k]=configall[k]);
   })
@@ -117,7 +117,11 @@ http.createServer((req,res)=>{
       headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
       headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
       headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
-      istextHtml=(headers["content-type"]||"").includes("text/html")
+      istextHtml=(headers["content-type"]||"").includes("text/html");
+      if(confg.setCookie&&istextHtml&&confg.cookie){
+        headers=utils.deletekey(headers,["Set-Cookie"]);
+        headers["set-cookie"]=confg.cookie.split(";").map(t=>t.trim());//是否需要在前端种植cookie
+      }
       env.contentType=headers["content-type"]||"";//设置content-type
       const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.relocation],
       afterfunc=[istextHtml&&plugins.insertInnerScript],
