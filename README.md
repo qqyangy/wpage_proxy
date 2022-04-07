@@ -49,7 +49,7 @@ wpage_proxy
 
 ### 使用方式
 - 1.添加配置文件 `proxy.config.js`
-- 2.在配置文件目录运行mian.js 如：`node main.js`
+- 2.在配置文件目录运行 如：`wpage_proxy [path]`
 
 ### 配置项明细
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量
