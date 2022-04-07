@@ -72,15 +72,15 @@ wpage_proxy
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认falses
   - `scripts` `:object` 要插入html的js脚本
-    - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
-        - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
-        - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
-    - `数字key` `:object|:string` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
-        > content、file、url同时配置多个时生效优先级最高的（使用string类型时与只有url属性的对象相同,且url值与指定的string一致）
-        - `content` `:string` 要插入的脚本内容 优先级3
-        - `file` `:string` 本机文件相对于配置文件的相对路劲 也可使用绝对路劲 优先级2
-        - `url` `:sting` 网络资源地址`协议://域名[:宽口][:路径][:参数]` 优先级1
-        - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
+      - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
+          - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
+          - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
+      - `数字key` `:object|:string` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
+          > content、file、url同时配置多个时生效优先级最高的（使用string类型时与只有url属性的对象相同,且url值与指定的string一致）
+          - `content` `:string` 要插入的脚本内容 优先级3
+          - `file` `:string` 本机文件相对于配置文件的相对路劲 也可使用绝对路劲 优先级2
+          - `url` `:sting` 网络资源地址`协议://域名[:宽口][:路径][:参数]` 优先级1
+          - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
     - `res` `:object|:function|:array`
       - `:function`
           - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
