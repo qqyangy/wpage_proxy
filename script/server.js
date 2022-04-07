@@ -78,6 +78,7 @@ http.createServer((req,res)=>{
     hostName:url.parse(utils.urlformat(req.headers.host||req.headers.origin)).hostname,
     hosts
   };
+  env.nurl=env.newOrigin+req.url;//新的url
 
   const resConfig=utils.extractTrans(configall,confg,env)//获取配置中res项
   if(resConfig.mock){

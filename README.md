@@ -110,8 +110,9 @@ wpage_proxy
 
 ### env 包属性
   - `keepInsert` 配置项中keepInsert的配置内容
-  - `url` 通过代理请求的新url
-  - `ourl` 原始请求url
+  - `url`  原始请求url
+  - `ourl` 原始请求url（与url一致）
+  - `nurl` 通过代理请求的新url
   - `path` path及请求参数部分
   - `proxyLocation` proxyLocation配置项
   - `mapUrl` mapUrl配置项
