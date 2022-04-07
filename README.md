@@ -109,6 +109,7 @@ wpage_proxy
       - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
 
 ### env 包属性
+  - `keepInsert` 配置项中keepInsert的配置内容
   - `url` 通过代理请求的新url
   - `ourl` 原始请求url
   - `path` path及请求参数部分
