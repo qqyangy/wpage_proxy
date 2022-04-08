@@ -52,7 +52,7 @@ wpage_proxy
 - 2.在配置文件目录运行 如：`wpage_proxy [path]`
 
 ### 配置项明细
-> 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量
+> 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量（在不更改server和localPort是配置文件可进行热更新）
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
