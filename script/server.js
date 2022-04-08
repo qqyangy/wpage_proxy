@@ -8,18 +8,11 @@ utils=require("./utils.js"),
 mimes=require("./mime.config.js"),
 {MyWriteStream}=require("./MyStream.js");
 
+const index=process.argv[2] || 0; // 获取配置索引
 
-const index=process.argv[2] || 0, // 获取配置索引
-configall=require(path.resolve(process.cwd(),"./proxy.config.js")),
-defaultlocalPort=configall.localPort||9200,
-confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
-//配置可继承属性
-["cookie","module","proxyLocation","keepInsert","setCookie"].forEach(k=>{
-  configall.hasOwnProperty(k) && confgs.forEach(o=>{
-    !o.hasOwnProperty(k) && (o[k]=configall[k]);
-  })
-})
-const confg=confgs[index],//获取当前配置
+let {configall,confgs,content}=utils.formatConfig(),//读取配置
+confg=confgs[index];//获取当前配置
+const defaultlocalPort=configall.localPort||9200,//全局默认端口
 localIp=utils.getIPAddress(),//获取本机ip
 hosts=confgs.map((o,i)=>{
   const domain=url.parse(o.server||"http:localhost:3001"),
@@ -38,14 +31,22 @@ hosts=confgs.map((o,i)=>{
 {port,hostname,protocol,localPort}=hosts[index];// 获取对饮篇日志
 
 
+//监听配置文件变化并热更新
+utils.watchConfig(o=>{
+  //更新篇日志
+  configall=o.configall;
+  confgs=o.confgs;
+  confg=confgs.find(o=>o.server===confg.server && o.localPort===confg.localPort)||confg;
+  console.log("配置更新成功");
+}).content=content;
+
+
 const corsHeader={
   'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
   'Access-Control-Allow-Headers': 'Accept, Referer, Accept-Language, Connection, Pragma, Authorization, Content-Type, Depth, User-Agent, X-File-Size, X-Requested-With, X-Requested-By, If-Modified-Since, X-File-Name, X-File-Type, Cache-Control, Origin',
   // "Access-Control-Expose-Headers": "Authorization",
   "Access-Control-Allow-Credentials":"true"
 };
-
-
 
 http.createServer((req,res)=>{
   req.headers.origin&&Object.assign(corsHeader,{"Access-Control-Allow-Origin":req.headers.origin});//允许对当前域跨域

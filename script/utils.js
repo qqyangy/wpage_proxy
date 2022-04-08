@@ -8,6 +8,8 @@ const getObject=(d,env)=>{
   const rd=typeof d === "function"?d(env):d;
   return rd&&rd.constructor===Object?rd:undefined;
 },
+//配置文档path
+configPath=path.resolve(process.cwd(),"./proxy.config.js"),
 // 获取正确的body数据
 getBodyData=(d,env)=>{
   return typeof d === "function"?d(env):d
@@ -247,5 +249,30 @@ module.exports={
       resolve({optins:noptions,data:target.body});
     })
     return result;
+  },
+  //标准化配置
+  formatConfig(c){
+   delete require.cache[configPath];//清楚模块缓存
+   const configall=require(configPath),//读取配置
+    confgs=(d=>d instanceof Array?d:[d])(configall.proxy).filter(o=>o.server).map(o=>(!/^\w+:\/\//.test(o.server)&&(o.server='http://'+o.server),o)); //获取全部配置
+    //配置可继承属性
+    ["cookie","module","proxyLocation","keepInsert","setCookie"].forEach(k=>{
+      configall.hasOwnProperty(k) && confgs.forEach(o=>{
+        !o.hasOwnProperty(k) && (o[k]=configall[k]);
+      })
+    }),
+    content=c||fs.readFileSync(configPath).toString();
+    return {configall,confgs,content};
+  },
+  watchConfig(update){
+    fs.watchFile(configPath,()=>{
+      const ncontent=fs.readFileSync(configPath).toString(),
+      centent=this.watchConfig.content;
+      if(centent!==ncontent){
+        this.watchConfig.content=ncontent;//跟新状态
+        update(this.formatConfig(ncontent));//跟新配置
+      }
+    })
+    return this.watchConfig;
   }
 }
