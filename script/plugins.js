@@ -87,7 +87,7 @@ creatLocation=()=>{
       href:location.href.replace(location.origin,pagehost.host),
       origin:pagehost.host,
       port:pagehost.port,
-      protocol:pagehost.protocol
+      protocol:pagehost.protocol+":"
     },
     setval={
       host(v){
