@@ -124,15 +124,16 @@ wpage_proxy
   - `tools` 数据转换工具包
     - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值
     - `jsonReset` 对json字符串或json数据做处理然后返回处理后数据 第1个参数(要处理的数据：任意类型) 第2个参数修改方案配置 返回修改后对象如果数据转换json失败直接返回原值
-    ```js
-      tools.toJson('{"a":10}');// 返回值{a:10};
-      tools.toJson('xxx');// 返回值 "xxx"
+`tools`工具包方法使用示例
+```js
+  tools.toJson('{"a":10}');// 返回值{a:10};
+  tools.toJson('xxx');// 返回值 "xxx"
 
-      tools.jsonReset({},{"b.c.y":100}); //返回值 {b:{c:{y:100}}};
-      tools.jsonReset('{"a":10,"z":{"d":1000}}',{"s":1}); //返回值 {a:10,z:{d:1000,s:1}};
-      tools.jsonReset("{}");//返回{} 没第2个参数时功能与tools.toJson一致
-      tools.jsonReset("xxxx",{});//返回"xxxx" 数据不可转换未对象时直接返回原值
-    ```
+  tools.jsonReset({},{"b.c.y":100}); //返回值 {b:{c:{y:100}}};
+  tools.jsonReset('{"a":10,"z":{"d":1000}}',{"s":1}); //返回值 {a:10,z:{d:1000,s:1}};
+  tools.jsonReset("{}");//返回{} 没第2个参数时功能与tools.toJson一致
+  tools.jsonReset("xxxx",{});//返回"xxxx" 数据不可转换未对象时直接返回原值
+```
 
 
 ### 基础文档示例
