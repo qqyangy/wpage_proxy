@@ -121,6 +121,10 @@ wpage_proxy
   - `localIp` 代理服务器id地址
   - `hostName` 浏览器使用的域名（不包含协议及端口）
   - `hosts` 代理组域名映射信息
+  - `tools` 数据转换工具包
+    - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值 例：`tools.toJson('{a:10}')`
+    - `jsonReset` 对json字符串或json数据做处理然后返回处理后数据 第1个参数(要处理的数据：任意类型) 第2个参数修改方案配置 返回修改后对象如果数据转换json失败直接返回原值 例：`tools.jsonReset({},{"b.c.y":100})`
+
 
 ### 基础文档示例
 
