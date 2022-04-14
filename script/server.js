@@ -77,7 +77,8 @@ http.createServer((req,res)=>{
     })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
     localIp,
     hostName:url.parse(utils.urlformat(req.headers.host||req.headers.origin)).hostname,
-    hosts
+    hosts,
+    tools:utils.tools
   };
   env.nurl=env.newOrigin+req.url;//新的url
 

@@ -166,7 +166,40 @@ function formatResCfg(res,url,results,env){
       }
     }
   }[Object.prototype.toString.call(res)]||(()=>{}))()
-}
+};
+//数据处理工具
+const tools={
+  //字符串转json
+  toJson(data){
+    if(!data || data instanceof Object) return data;
+    const isString=typeof data ==="string";
+    let result=data;
+    if(isString || Buffer.isBuffer(data)){
+      try{
+        const dt=isString?data:data.toString();
+        result=JSON.parse(dt);
+      }catch(e){}
+    }
+    return result;
+  },
+  //设置数据
+  jsonReset(data,conf={}){
+    const dt=this.toJson(data) || data;
+    if(!dt || !["[object Array]","[object Object]"].includes(Object.prototype.toString(dt))) return data;
+    const keys=Object.keys(conf);
+    if(keys.length===0) return dt;
+    keys.forEach(k=>{
+      const val=conf[k];
+      const ks=k.split(".").map(v=>v.trim()).filter(v=>v);
+      ks.reduce((o,k1,i)=>{
+        const last=i===ks.length-1;
+        if(last) return o[k1]=val;
+        return o[k1] instanceof Object ? o[k1] : (o[k1]={});
+      },dt);
+    });
+    return dt;
+  }
+};
 module.exports={
   textcontent,
   deletekey,
@@ -274,5 +307,6 @@ module.exports={
       }
     })
     return this.watchConfig;
-  }
+  },
+  tools
 }
