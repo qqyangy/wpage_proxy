@@ -124,7 +124,9 @@ wpage_proxy
   - `tools` 数据转换工具包
     - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值
     - `jsonReset` 对json字符串或json数据做处理然后返回处理后数据 第1个参数(要处理的数据：任意类型) 第2个参数修改方案配置 返回修改后对象如果数据转换json失败直接返回原值
+
 `tools`工具包方法使用示例
+
 ```js
   tools.toJson('{"a":10}');// 返回值{a:10};
   tools.toJson('xxx');// 返回值 "xxx"
