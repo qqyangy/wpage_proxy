@@ -1,5 +1,6 @@
 const fs=require("fs"),
-path=require("path");
+path=require("path"),
+utils=require("./utils.js");
 //通过script配置对象生成script标签
 const formatScript=o=>{
   if(!o || o.constructor!==Object){
@@ -187,9 +188,7 @@ const plugins={
   //向html中添加js脚本
   addScripts(scripts,text,h,{contentType,url}){
     if(contentType && contentType.includes("html") && text && /<html/i.test(text) && scripts && scripts.constructor===Object && scripts.test){
-      const isstr=typeof scripts.test === "string",
-      isreg=!isstr && scripts.test instanceof RegExp;
-      if(!(isstr && url.includes(scripts.test) || isreg && scripts.test.test(url))) return text;
+      if(!utils.urlTest(url,scripts.test)) return text; // 如果有test条件 但验证不通过则不处理
       const numkeys=Object.keys(scripts).map(n=>Number(n)).filter(n=>!Number.isNaN(n));
       numkeys.forEach(n=>{
         const o=scripts[n];
