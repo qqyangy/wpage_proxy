@@ -32,7 +32,7 @@ git clone http://gitlab.17zuoye.net:10080/yong.yang/wpage_proxy.git
 cd wpage_proxy
 
 # 安装依赖及运行命令
-npm run i
+sudo npm run i
 
 # 进入工作目录
 cd /xxx/xxx/xxx/
@@ -72,9 +72,10 @@ wpage_proxy
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认falses
   - `scripts` `:object` 要插入html的js脚本
-      - `test` `:string|:regexp` 确定要是用的脚本植入的被代理请求的url
+      - `test` `:string|:regexp|:array` 确定要是用的脚本植入的被代理请求的url
           - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
           - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
+          - `:array` 每个item必须为字符串或正则 其他类型会被忽略 全部验证通过则通过否则未不通过
       - `数字key` `:object|:string` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
           > content、file、url同时配置多个时生效优先级最高的（使用string类型时与只有url属性的对象相同,且url值与指定的string一致）
           - `content` `:string` 要插入的脚本内容 优先级3
@@ -88,6 +89,7 @@ wpage_proxy
           - 需要调整响应数据时 可以`this.body` 或 `return newdata`;
       - `:object`
           - `test` 添加生效条件配置方式同 `scripts.test`配置
+          - `statusCode` `:number` 配置显示的状态码
           - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
           - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】
         - `body` `:function|:string|:json` 优先级2 【使用mock数据并不会向原服务器发送请求】
@@ -101,7 +103,6 @@ wpage_proxy
       - `:function` 同res的函数配置形式
       - `:object`
           - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
-          - `statusCode` `:number` 配置显示的状态码
           - `path` `:string` 配置修改源服务器路径 比如 希望请求a接口却返回b接口数据
           - `query` `:string|:object` 配置调整请求原url的参数部分
           - `hash` `:string` 调整请求时hash 正常情况没什么用
