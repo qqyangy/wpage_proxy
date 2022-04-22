@@ -200,7 +200,15 @@ const tools={
       const ks=k.split(".").map(v=>v.trim()).filter(v=>v);
       ks.reduce((o,k1,i)=>{
         const last=i===ks.length-1;
-        if(last) return o[k1]=val;
+        if(last){
+          let rval;
+          try{
+            rval=typeof val === "function" ? val(dt):val;
+          }catch(e){
+            console.log("jsonReset取值错误：",k);
+          }
+          return o[k1]=rval;
+        }
         return o[k1] instanceof Object ? o[k1] : (o[k1]={});
       },dt);
     });
