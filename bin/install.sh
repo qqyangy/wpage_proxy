@@ -5,12 +5,11 @@
 
 echo "依赖安装完成,准备安装全局命令"
 
-#修改可执行文件路劲并把内容写入临时文件
-cat ./bin/wpage_proxy.sh | sed "s#^node.*\$#node $PWD/main.js#" > ./bin/wpage_proxy.sh.tmp; 
-#从零时文件写入到源文件
-cat ./bin/wpage_proxy.sh.tmp > ./bin/wpage_proxy.sh;
-#删除零时文件
-rm -f ./bin/wpage_proxy.sh.tmp;
+#拷贝文件可执行文件
+cp ./bin/wpage_proxy.templete.sh ./bin/wpage_proxy.sh;
+
+#重置执行文件路劲
+cat ./bin/wpage_proxy.templete.sh | sed "s#^node.*\$#node $PWD/main.js#" > ./bin/wpage_proxy.sh; 
 
 binpath=$(which node | sed "s#node\$#wpage_proxy#");
 if [[ $binpath =~ wpage_proxy ]];then
