@@ -6,9 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node main.js",
-    "weinre-i": "npm instll weinre -g",
+    "weinre-i": "npm install weinre -g",
     "weinre":"weinre --boundHost -all- --httpPort 8231",
-    "i":"npm install && sh ./bin/install.sh"
+    "i":"npm install && npm run weinre-i && sh ./bin/install.sh"
   },
   "author": "yong.yang",
   "license": "ISC",
