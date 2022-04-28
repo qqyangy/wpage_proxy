@@ -107,9 +107,10 @@ http.createServer((req,res)=>{
     const resStream=new MyWriteStream();//响应数据中转流
     // 发起请求
     const reqs2=request(reqOptions,(err,res2)=>{
-      if(err || res2 && res2.statusCode >= 500){
-        res.writeHead((!err&&res2 && res2.statusCode)||500,{});
-        return res.end(err&&err.toString&&err.toString()||res2&&res2.statusCode);
+      const _res2=res2||{};
+      if(err || !_res2.statusCode || _res2.statusCode >= 500){
+        res.writeHead(_res2.statusCode||500,_res2.headers||{});
+        return _res2.statusCode?resStream.then(d=>res.end(d)):res.end("服务器错误");
       }
       let headers=res2.headers;
       if(!headers["content-type"]){
