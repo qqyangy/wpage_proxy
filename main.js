@@ -27,12 +27,16 @@ const weinrePort=utils.weinrePort(configall);
 if(weinrePort){
   //需要启动weinre
   const ls=child_process.spawn("weinre",["--httpPort",weinrePort,"--boundHost","-all-"]);
-  ls.stdout.on('data', (data) => {
+  const weinreLog=configall.weinreLog||0;
+  weinreLog&&[1,3].includes(weinreLog)&&ls.stdout.on('data', (data) => {
     console.log(`${data}`);
-    console.log(`weinre: http://${localIp}:${weinrePort}`);
   });
-  ls.stderr.on('data', (data) => {
+  weinreLog&&[1,2].includes(weinreLog)&&ls.stderr.on('data', (data) => {
     console.log(`weinreErr: ${data}`);
+  });
+  console.log(`weinre: http://${localIp}:${weinrePort}`);
+  ls.on("error",()=>{
+    console.log("weinre 启动失败");
   });
 }
 

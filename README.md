@@ -56,6 +56,7 @@ wpage_proxy
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
 - `weinre` `:number` 全局配置 weinre的端口（配置时且值位number时启动weinre不配置时不启动）
+- `weinreLog` `:number` 全局配置 weinre日志信息输出 0不输出任何信息 1输出常规日志 2输出错误日志 3全部输出 默认0
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
 - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取 【可被继承】
 - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认false【可被继承】
