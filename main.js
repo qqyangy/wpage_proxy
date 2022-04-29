@@ -34,7 +34,7 @@ if(weinrePort){
   weinreLog&&[1,2].includes(weinreLog)&&ls.stderr.on('data', (data) => {
     console.log(`weinreErr: ${data}`);
   });
-  console.log(`weinre: http://${localIp}:${weinrePort}`);
+  console.log(`weinre: http://localhost:${weinrePort}`);
   ls.on("error",()=>{
     console.log("weinre 启动失败");
   });
