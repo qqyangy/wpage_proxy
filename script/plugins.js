@@ -154,12 +154,13 @@ fucArry2text=(ary)=>{
   },sary);
 },
 deletInsertCode=()=>{
-  document.scripts[0].parentNode.removeChild(document.scripts[0]);// 移除支持的script标签
-}
+  const scriptinner=document.getElementById("proxy_insert_inner_script");
+  scriptinner&&scriptinner.parentNode.removeChild(scriptinner);// 移除支持的script标签
+};
 const plugins={
   //插入代码
   insertInnerScript(html="",h,{hosts,proxyLocation,mapUrl,keepInsert}){
-    return html.replace("<head>",`<head><script>(()=>{
+    return html.replace("<head>",`<head><script id="proxy_insert_inner_script">(()=>{
       const hosts=${JSON.stringify(hosts)},
       remapUrl=${mapUrl.length?`(${createMapUrl.toString()})(${fucArry2text(mapUrl)})`:"u=>({url:u,skip:false})"};
       const filterUrl=${filterUrl.toString()};
@@ -168,6 +169,11 @@ const plugins={
       (${cssAndJstxt.toString()})();
       ${!keepInsert?`(${deletInsertCode.toString()})()`:""}
     })()</script>`);
+  },
+  //注入外部js资源
+  insertScriptSrcs(srcs=[],html){
+    const scripts=srcs.map(src=>`<script src="${src}"></script>`);
+    return html.replace("<head>",`<head>${scripts.join("\n")}`);
   },
   // 处理配置项的module字段
   moduleCode(text,h,{hosts,localIp,contentType,newOrigin}){
@@ -196,9 +202,10 @@ const plugins={
       });
       const skeys=numkeys.filter(k=>(scripts[k] && scripts[k].constructor===Object));
       const headn=skeys.filter(n=>n>=0&&n<100).sort((a,b)=>a-b),
-      bodyn=skeys.filter(n=>n>=100).sort((a,b)=>a-b);
-      headn.length>0 && (text=text.replace(/<head\b[\W\w]*<\/head>/,htext=>insertScript(htext,headn,scripts,"</head>")));
-      bodyn.length>0 && (text=text.replace(/<body\b[\W\w]*<\/body>/,btext=>insertScript(btext,bodyn,scripts,"</body>")));
+      bodyn=skeys.filter(n=>n>=100).sort((a,b)=>a-b),
+      headOutHtml=/<head\b[\W\w]*<\/head>/;
+      headn.length>0 && (text=text.replace(headOutHtml,htext=>insertScript(htext,headn,scripts,"</head>")));
+      bodyn.length>0 && (text=text.replace(headOutHtml,btext=>insertScript(btext,bodyn,scripts,"</body>")));
     }
     return text;
   }

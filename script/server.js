@@ -14,6 +14,8 @@ let {configall,confgs,content}=utils.formatConfig(),//读取配置
 confg=confgs[index];//获取当前配置
 const defaultlocalPort=configall.localPort||9200,//全局默认端口
 localIp=utils.getIPAddress(),//获取本机ip
+weinrePort=utils.weinrePort(configall),
+weinreHost=weinrePort?`http://${localIp}:${weinrePort}/target/target-script-min.js#anonymous`:"",
 hosts=confgs.map((o,i)=>{
   const domain=url.parse(o.server||"http:localhost:3001"),
   {port="",hostname=""}=domain,
@@ -29,7 +31,6 @@ hosts=confgs.map((o,i)=>{
   };
 }),
 {port,hostname,protocol,localPort}=hosts[index];// 获取对饮篇日志
-
 
 //监听配置文件变化并热更新
 utils.watchConfig(o=>{
@@ -127,8 +128,13 @@ http.createServer((req,res)=>{
         headers["set-cookie"]=confg.cookie.split(";").map(t=>t.trim());//是否需要在前端种植cookie
       }
       env.contentType=headers["content-type"]||"";//设置content-type
+
+      const aftersource=[!confg.disableWeinre&&weinreHost].filter(t=>t);//需要最后处理插入的js资源
       const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.relocation],
-      afterfunc=[istextHtml&&plugins.insertInnerScript],
+      afterfunc=[
+        istextHtml&&plugins.insertInnerScript,//注入基础脚本
+        istextHtml&&aftersource.length>0&&plugins.insertScriptSrcs.bind(plugins,aftersource)//注入外部js
+      ],
       filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
       // 加工响应数据
       const execcontent=utils.textcontent(res2.headers,env,filters);

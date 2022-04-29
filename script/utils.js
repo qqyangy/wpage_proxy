@@ -323,6 +323,10 @@ module.exports={
     })
     return this.watchConfig;
   },
+  //提取weinre
+  weinrePort(cfg){
+    return cfg && cfg.weinre && typeof cfg.weinre ==="number" && cfg.weinre; //验证通过则返回端口号
+  },
   urlTest,
   tools
 }

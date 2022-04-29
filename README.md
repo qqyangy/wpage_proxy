@@ -55,6 +55,7 @@ wpage_proxy
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量（在不更改server和localPort是配置文件可进行热更新）
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】
 - `module` `:boolean` 是否对html及js内容进行检查并自动替换请求域名 【可被继承】
+- `weinre` `:number` 全局配置 weinre的端口（配置时且值位number时启动weinre不配置时不启动）
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
 - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取 【可被继承】
 - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认false【可被继承】
@@ -68,6 +69,7 @@ wpage_proxy
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
   - `server` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
   - `localPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
+  - `disableWeinre` `:boolean` 在全局配置有weinre时当前服务是否禁止使用weinre,默认false
   - `proxyLocation` `:boolean` 是否代理location 不配置时使用递增形式继承全局
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认falses
