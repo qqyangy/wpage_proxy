@@ -7,7 +7,7 @@ if(!fs.existsSync(configpath)){
   return console.log("配置文件：proxy.config.js 不存在,请先创建配置在运行命令");
 }
 const localIp=utils.getIPAddress();
-console.log("当前主机IP地址：",localIp);
+console.log("当前主机IP地址:",localIp);
 const configall=require(configpath),
 confgs=(d=>d instanceof Array?d:[d])(configall.proxy);
 const servers=confgs.filter(o=>o.server).map((c,i)=>{

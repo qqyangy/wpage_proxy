@@ -150,4 +150,4 @@ http.createServer((req,res)=>{
 
 }).listen(localPort);
 
-console.log("服务启动=>",localPort,confg.server,`http://${localIp}:${localPort}`);
+console.log("服务启动=>",confg.server,"=>",`http://${localIp}:${localPort}`);
