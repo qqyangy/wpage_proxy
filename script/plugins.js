@@ -180,8 +180,10 @@ const plugins={
     if(/html|javascript/.test(contentType)){
       hosts.forEach((o,index)=>{
         let i=0;
-        while((i=text.indexOf(o.host,i))!==-1){
-          text=text.replace(o.host,index===0?newOrigin:`http://${localIp}:${o.localPort}`);
+        const host="//"+o.host.split("//")[1];
+        while((i=text.indexOf(host,i))!==-1){
+          const reg=new RegExp(`(https?:)?${host}`);
+          text=text.replace(reg,index===0?newOrigin:`http://${localIp}:${o.localPort}`);
         }
       })
     }
