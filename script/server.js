@@ -32,14 +32,17 @@ hosts=confgs.map((o,i)=>{
 }),
 {port,hostname,protocol,localPort}=hosts[index];// 获取对饮篇日志
 
+confg.server=tools.formatServer(confg.server);//删除最后斜杠
 //监听配置文件变化并热更新
 utils.watchConfig(o=>{
   //更新篇日志
   configall=o.configall;
   confgs=o.confgs;
-  confg=confgs.find(o=>o.server===confg.server && o.localPort===confg.localPort)||confg;
+  confg=confgs.find(o=>tools.formatServer(o.server)===tools.formatServer(confg.server) && o.localPort===confg.localPort)||confg;
+  confg.server=tools.formatServer(confg.server);//删除最后斜杠
   console.log("配置更新成功");
 }).content=content;
+
 
 
 const corsHeader={

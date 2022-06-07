@@ -51,6 +51,25 @@ wpage_proxy
 - 1.添加配置文件 `proxy.config.js`
 - 2.在配置文件目录运行 如：`wpage_proxy [path]`
 
+### 运行命令及参数
+```sh
+# 交互式方式在当前工作目录创建基础配置文件
+wpage_proxy init
+
+# 使用vscode打开当前工作目录的配置文件
+wpage_proxy open
+
+# 删除当前工目录的配置文件
+wpage_proxy remove
+
+# 使用当前工作目录下的配置文件启动代理服务
+wpage_proxy
+
+# 只用指定目录下的配置文件启动代理服务
+wpage_proxy /xxx/yyy/xxx/
+
+```
+
 ### 配置项明细
 > 配置文件为nodejs可执行文件 可使用nodejs相关API及环境变量（在不更改server和localPort是配置文件可进行热更新）
 - `localPort` `:number` 全局配置代理服务端口号（多个未配置端口号的服务使用此配置基础上已递增形式创建）【可被继承】

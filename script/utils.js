@@ -327,6 +327,9 @@ module.exports={
   weinrePort(cfg){
     return cfg && cfg.weinre && typeof cfg.weinre ==="number" && cfg.weinre; //验证通过则返回端口号
   },
+  formatServer(s=""){
+    return s.replace(/\/$/,"");
+  },
   urlTest,
   tools
 }
