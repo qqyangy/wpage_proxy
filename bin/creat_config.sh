@@ -21,7 +21,7 @@ server=${server:-http://localhost:3000};
 
 echo -e "localPort（默认5200）: \c";
 read localPort;
-localPort=${localPort:-5000};
+localPort=${localPort:-5200};
 
 # 生成配置文件
 cat ${wpage_proxy_path}proxy.config.templat.js | awk -v server="$server" -v localPort="$localPort" -F ":" -v OFS=":" '{
