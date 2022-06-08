@@ -51,16 +51,19 @@ wpage_proxy
 - 1.添加配置文件 `proxy.config.js`
 - 2.在配置文件目录运行 如：`wpage_proxy [path]`
 
-### 运行命令及参数
+### 子命令及参数
 ```sh
 # 交互式方式在当前工作目录创建基础配置文件
 wpage_proxy init
 
-# 使用vscode打开当前工作目录的配置文件
+# 使用vscode打开当前工作目录的配置文件及wpage_proxy_bodyfiles目录
 wpage_proxy open
 
-# 删除当前工目录的配置文件
+# 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
 wpage_proxy remove
+
+# 下载远程资源到本地./wpage_proxy_bodyfiles目录 示例：wpage_proxy down index.html https://www.baidu.com/
+wpage_proxy down 文件名 远程资源url
 
 # 使用当前工作目录下的配置文件启动代理服务
 wpage_proxy
@@ -113,7 +116,7 @@ wpage_proxy /xxx/yyy/xxx/
           - `test` 添加生效条件配置方式同 `scripts.test`配置
           - `statusCode` `:number` 配置显示的状态码
           - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
-          - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】
+          - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】如果文件在`./wpage_proxy_bodyfiles`目录中可省略wpage_proxy_bodyfiles 如：`./wpage_proxy_bodyfiles/index.html`可写成`./index.html`;
         - `body` `:function|:string|:json` 优先级2 【使用mock数据并不会向原服务器发送请求】
           - `:function`
               - 可接受一个参数 `env` 环境包

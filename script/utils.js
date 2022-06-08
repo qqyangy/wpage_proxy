@@ -74,11 +74,13 @@ setBodyFile=(target)=>{
       target.body=child_process.execSync(`curl ${target.bodyFile}`); //网络资源数据
       return target;
     }
-    const pt=path.resolve(process.cwd(),target.bodyFile);
-    if(!fs.existsSync(pt)){
+    const pt=path.resolve(process.cwd(),target.bodyFile),
+    pt2=path.resolve(process.cwd(),"./wpage_proxy_bodyfiles/",target.bodyFile);
+    const fpt=fs.existsSync(pt) && pt || fs.existsSync(pt2) && pt2;//返回有效文件路劲
+    if(!fpt){
       console.log(`指定的bodyFile：${target.bodyFile} 不存在!`);
     }else{
-      target.body=fs.readFileSync(pt); // 本机文件数据
+      target.body=fs.readFileSync(fpt); // 本机文件数据
     }
   }
   return target;

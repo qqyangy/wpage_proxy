@@ -1,0 +1,62 @@
+#!/bin/bash
+if [[ $# -ge 1 ]];
+then
+  # 运行remove命令
+  if [[ $1 == remove ]];
+  then
+    # 删除配置
+    if [[ -f ./proxy.config.js  ]];
+    then
+      rm -f ./proxy.config.js;
+    fi;
+    # 删除bodyfile目录
+    if [[ -d ./wpage_proxy_bodyfiles ]];
+    then
+      rm -rf ./wpage_proxy_bodyfiles;
+    fi;
+    if [[ $? -eq 0 ]];
+    then
+      echo -e "\033[32m清除成功！\033[0m";
+    fi;
+    exit 0
+  fi;
+   # 运行init命令
+  if [[ $1 == init ]];
+  then
+    . ${wpage_proxy_path}bin/creat_config.sh;
+    exit 0
+  fi;
+   # 在vscode中打开
+  if [[ $1 == open ]];
+  then
+    cmd=$(ls /Applications | egrep -i "Visual\s+Studio\s+Code");
+    if [[ "$cmd" != "" ]];
+    then
+      if [[ -d ./wpage_proxy_bodyfiles ]];
+      then
+         open -a "/Applications/$cmd/" ./wpage_proxy_bodyfiles;
+      fi;
+      open -a "/Applications/$cmd/" ./proxy.config.js;
+    else
+      open .;
+      echo "找不到vscode应用,请手动打开"
+    fi;
+    exit 0
+  fi;
+  # 下载文件
+  echo $1;
+  if [[ $1 == down ]];
+  then
+    if [[ $# -ge 3 ]];
+    then
+      if [[ ! -d ./wpage_proxy_bodyfiles ]];
+      then
+        mkdir ./wpage_proxy_bodyfiles;
+      fi;
+      curl -o "./wpage_proxy_bodyfiles/$2" $3;
+    else
+     echo -e "\033[31m缺少下载参数,正确下载命令格式为：\033[33m wpage_proxy down 文件名 远程资源url\033[0m";
+    fi;
+    exit 0
+  fi;
+fi;
