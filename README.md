@@ -60,7 +60,7 @@ wpage_proxy init
 wpage_proxy open
 
 # 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
-wpage_proxy remove
+wpage_proxy clean
 
 # 下载远程资源到本地./wpage_proxy_bodyfiles目录 示例：wpage_proxy down index.html https://www.baidu.com/
 wpage_proxy down 文件名 远程资源url

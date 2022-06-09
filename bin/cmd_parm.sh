@@ -1,8 +1,8 @@
 #!/bin/bash
 if [[ $# -ge 1 ]];
 then
-  # 运行remove命令
-  if [[ $1 == remove ]];
+  # 运行clean命令
+  if [[ $1 == clean ]];
   then
     # 删除配置
     if [[ -f ./proxy.config.js  ]];
@@ -19,6 +19,49 @@ then
       echo -e "\033[32m清除成功！\033[0m";
     fi;
     exit 0
+  fi;
+   # 运行remove命令
+  if [[ $1 == remove ]];
+  then
+    if [[ $# -lt 2 ]];
+    then
+      echo "tip:至少要指定1个要删除的文件！"
+    else
+      if [[ $2 == "-d" ]];
+      then
+        if [[ -d ./wpage_proxy_bodyfiles ]];
+        then
+          rm -rf ./wpage_proxy_bodyfiles;
+           if [[ $? -eq 0 ]];
+           then
+              echo -e "\033[32m删除 ./wpage_proxy_bodyfiles 目录成功！\033[0m"
+           else
+              echo -e "\033[31m删除 ./wpage_proxy_bodyfiles 目录失败！\033[0m"
+           fi;
+        else
+          echo '不存在目录：./wpage_proxy_bodyfiles'
+        fi;
+       exit 0;
+      fi;
+      args=($*);
+      for ((i=1;i<${#args[*]};i++)){
+        file=${args[i]};
+        filename=./wpage_proxy_bodyfiles/${file##*/};
+        if [[ -f $filename ]];
+        then
+          rm -f $filename;
+          if [[ $? -eq 0 ]];
+          then
+            echo -e "\033[42;30m 成功删除文件：\033[0;32m $filename \033[0m"
+          else
+            echo -e "\033[41;30m 文件删除失败：\033[0;31m $filename \033[0m"
+          fi;
+        else
+          echo -e "\033[43;30m 并不存在文件：\033[0;33m $filename \033[0m"
+        fi;
+      }
+    fi;
+    exit 0;
   fi;
    # 运行init命令
   if [[ $1 == init ]];
