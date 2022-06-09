@@ -62,8 +62,13 @@ wpage_proxy open
 # 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
 wpage_proxy clean
 
+# 删除mock文件
+wpage_proxy remove -d #删除整个文件目录 wpage_proxy_bodyfiles
+wpage_proxy remove index.html app.js  #删除wpage_proxy_bodyfiles目录下的指定文件 一个或多个（会自动忽略参数的path部分）
+
 # 下载远程资源到本地./wpage_proxy_bodyfiles目录 示例：wpage_proxy down index.html https://www.baidu.com/
 wpage_proxy down 文件名 远程资源url
+wpage_proxy down index.html https://www.baidu.com/ # 将百度首页下载到./wpage_proxy_bodyfiles/index.html
 
 # 使用当前工作目录下的配置文件启动代理服务
 wpage_proxy
