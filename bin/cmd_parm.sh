@@ -61,7 +61,7 @@ then
     fi;
     if [[ -d ./wpage_proxy_bodyfiles ]];
     then
-      ls -lh ./wpage_proxy_bodyfiles | awk '$9{printf "%-40s%10s\n","./wpage_proxy_bodyfiles/"$9,$5;}'
+      ls -lh ./wpage_proxy_bodyfiles | awk '$9{printf "%-40s%10s\n","wpage_proxy_bodyfiles/"$9,$5;}'
       echo "----------------------------------------------------------------"
       ls ./wpage_proxy_bodyfiles | xargs echo;
       echo;
