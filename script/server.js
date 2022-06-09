@@ -42,7 +42,33 @@ utils.watchConfig(o=>{
   console.log("配置更新成功");
 }).content=content;
 
+// 生成处理响应数据函数
+const configHandlerPickUp=(headers,req,resConfig,env,bodyfile="")=>{
+  if(!headers["content-type"]){
+    const ext=utils.getExt(bodyfile)||utils.getExt(req.url),// 获取文件后缀
+    vcontent=ext&&mimes[ext]||index==0&&"text/html; charset=UTF-8";
+    vcontent&&(headers["content-type"]=vcontent); //处理默认contentType
+  }
+  headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
+  headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
+  headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
+  const istextHtml=(headers["content-type"]||"").includes("text/html");
+  if(confg.setCookie&&istextHtml&&confg.cookie){
+    headers=utils.deletekey(headers,["Set-Cookie"]);
+    headers["set-cookie"]=confg.cookie.split(";").map(t=>t.trim());//是否需要在前端种植cookie
+  }
+  env.contentType=headers["content-type"]||"";//设置content-type
 
+  const aftersource=[!confg.disableWeinre&&weinreHost].filter(t=>t);//需要最后处理插入的js资源
+  const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.relocation],
+  afterfunc=[
+    istextHtml&&plugins.insertInnerScript,//注入基础脚本
+    istextHtml&&aftersource.length>0&&plugins.insertScriptSrcs.bind(plugins,aftersource)//注入外部js
+  ],
+  filters=beforfuncs.concat(resConfig.resultfuncs).concat(afterfunc).filter(f=>f&&typeof f==="function");
+  // 加工响应数据
+  return utils.textcontent(headers,env,filters);
+}
 
 const corsHeader={
   'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
@@ -85,9 +111,15 @@ http.createServer((req,res)=>{
   };
   env.nurl=env.newOrigin+req.url;//新的url
 
+
+
   const resConfig=utils.extractTrans(configall,confg,env)//获取配置中res项
   if(resConfig.mock){
-    return utils.resMock({req,res,resConfig,corsHeader}); // 处理mock结果
+    const reshead=Object.assign({},corsHeader);
+    const execcontent=configHandlerPickUp(reshead,req,resConfig,env,resConfig.res.bodyFile);
+    const resultdata=execcontent(resConfig.res.body);
+    resConfig.res.body=resultdata.body;
+    return utils.resMock({req,res,resConfig,reshead}); // 处理mock结果
   }
   nhost=port?hostname+":"+port:hostname,
   headers=Object.assign(utils.deletekey(req.headers,["accept-encoding","if-none-match","if-modified-since","cache-control"]),{
@@ -116,30 +148,8 @@ http.createServer((req,res)=>{
         return _res2.statusCode?resStream.then(d=>res.end(d)):res.end("服务器错误");
       }
       let headers=res2.headers;
-      if(!headers["content-type"]){
-        const ext=(/\.\w+$/.exec(req.url.split("?")[0].split("#")[0])||[""])[0].replace(".",""),// 获取文件后缀
-        vcontent=ext&&mimes[ext]||index==0&&"text/html; charset=UTF-8";
-        vcontent&&(headers["content-type"]=vcontent); //处理默认contentType
-      }
-      headers=utils.deletekey(headers,["content-security-policy","content-encoding","content-length"]);//删除csp限制
-      headers=utils.deletekey(headers,["last-modified","etag"]);//删除缓存相关
-      headers=utils.deletekey(headers,["access-control-allow-origin","access-control-allow-methods","access-control-allow-headers","access-control-allow-credentials"]);//删除已统一配置的key
-      istextHtml=(headers["content-type"]||"").includes("text/html");
-      if(confg.setCookie&&istextHtml&&confg.cookie){
-        headers=utils.deletekey(headers,["Set-Cookie"]);
-        headers["set-cookie"]=confg.cookie.split(";").map(t=>t.trim());//是否需要在前端种植cookie
-      }
-      env.contentType=headers["content-type"]||"";//设置content-type
-
-      const aftersource=[!confg.disableWeinre&&weinreHost].filter(t=>t);//需要最后处理插入的js资源
-      const beforfuncs=[istextHtml&&confg.scripts&&plugins.addScripts.bind(plugins,confg.scripts),confg.module&&plugins.moduleCode,confg.proxyLocation&&plugins.relocation],
-      afterfunc=[
-        istextHtml&&plugins.insertInnerScript,//注入基础脚本
-        istextHtml&&aftersource.length>0&&plugins.insertScriptSrcs.bind(plugins,aftersource)//注入外部js
-      ],
-      filters=beforfuncs.concat(resConfig.res).concat(afterfunc).filter(f=>f&&typeof f==="function");
-      // 加工响应数据
-      const execcontent=utils.textcontent(res2.headers,env,filters);
+       // 加工响应数据
+      const execcontent=configHandlerPickUp(headers,req,resConfig,env);
       resStream.then(d=>{
         const resultdata=execcontent(d);
         res.writeHead(resultdata.statusCode||res.statusCode||200,Object.assign(headers,resultdata.headers,corsHeader));

@@ -143,8 +143,7 @@ function formatResCfg(res,url,results,env){
       switch(true){
         case iskeys(res,["body","bodyFile"]):
           // 需要使用mock数据
-          results.mockIndex=results.length;
-          return results.push(function(){
+          results.mockFunc=function(){
             setValue(this,res,configkeys);
             headers&&(this.headers=getObject(headers,env));//判断是否需要设置headers
             if(res.bodyFile){
@@ -153,7 +152,7 @@ function formatResCfg(res,url,results,env){
               this.body=getBodyData(res.body,env)
             }
             return this.body;
-          });
+          };
         case res.handler && res.handler.constructor===Function:
            // 使用handler处理
           return results.push(headers?function(...p){
@@ -245,11 +244,12 @@ module.exports={
     const resultfuncs=[];
     formatResCfg(pcfg[key],url,resultfuncs,env); // 处理根配置
     formatResCfg(cfg[key],url,resultfuncs,env); // 处理对应域配置
-    const mock="mockIndex" in resultfuncs;//是否为mock类型
+    const mock="mockFunc" in resultfuncs;//是否为mock类型
     const target={};
     return {
       mock,
-      [key]:mock && key==="res"?resultfuncs[resultfuncs.mockIndex].call(target)&&target:resultfuncs
+      [key]:mock && key==="res"?resultfuncs.mockFunc.call(target)&&target:resultfuncs,
+      resultfuncs
     }
   },
   // 处理响应mock数据方法
@@ -329,8 +329,13 @@ module.exports={
   weinrePort(cfg){
     return cfg && cfg.weinre && typeof cfg.weinre ==="number" && cfg.weinre; //验证通过则返回端口号
   },
+  // 删除server结尾处斜杠
   formatServer(s=""){
     return s.replace(/\/$/,"");
+  },
+  //获取文件后缀
+  getExt(url){
+    return (/\.\w+$/.exec(url.split("?")[0].split("#")[0])||[""])[0].replace(".","");
   },
   urlTest,
   tools
