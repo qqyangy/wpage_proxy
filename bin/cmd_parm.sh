@@ -20,6 +20,54 @@ then
     fi;
     exit 0
   fi;
+   # 运行touch命令
+  if [[ $1 == touch ]];
+  then
+     if [[ $# -lt 2 ]];
+    then
+      echo "tip:至少要指定1个需要创建的文件！"
+    else
+      touchfiles=($*);
+      for ((i=1;i<${#touchfiles[*]};i++)){
+        filename=./wpage_proxy_bodyfiles/${touchfiles[i]##*/};
+        if [[ -f $filename ]];
+        then
+          echo -e "\033[33m已存在 $filename 文件无需重复创建！\033[0m"
+        else
+          if [[ ! -d ./wpage_proxy_bodyfiles ]];
+          then
+            mkdir ./wpage_proxy_bodyfiles;
+          fi;
+          touch $filename;
+          if [[ $? -eq 0 ]];
+          then
+            echo -e "\033[42;30m 成功创建文件：\033[0;32m $filename \033[0m"
+          else
+            echo -e "\033[41;30m 文件创建失败：\033[0;31m $filename \033[0m"
+          fi;
+        fi;
+      }
+    fi;
+    exit 0;
+  fi;
+   # 运行ls命令
+  if [[ $1 == ls ]];
+  then
+    if [[ -f ./proxy.config.js ]];
+    then
+      echo;
+      ls -lh | awk '$9=="proxy.config.js"{printf "%-40s%10s\n",$9,$5;}'
+      echo "----------------------------------------------------------------"
+    fi;
+    if [[ -d ./wpage_proxy_bodyfiles ]];
+    then
+      ls -lh ./wpage_proxy_bodyfiles | awk '$9{printf "%-40s%10s\n","./wpage_proxy_bodyfiles/"$9,$5;}'
+      echo "----------------------------------------------------------------"
+      ls ./wpage_proxy_bodyfiles | xargs echo;
+      echo;
+    fi;
+    exit 0;
+  fi;
    # 运行remove命令
   if [[ $1 == remove ]];
   then

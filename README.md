@@ -62,6 +62,15 @@ wpage_proxy open
 # 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
 wpage_proxy clean
 
+# 查看当前目录下的配置文件及wpage_proxy_bodyfiles目录下的文件 并且分3部分显示
+# 1 显示 proxy.config.js 文件 及文件大小  （如果有时）
+# 2 显示 wpage_proxy_bodyfiles 目录中的文件及大小 （如果有时）
+# 3 显示 wpage_proxy_bodyfiles 目录中的文件名 用空格隔开 （便于拷贝进行别的操作等）
+wpage_proxy ls
+
+# 创建mock文件
+wpage_proxy touch index.html app.js  #在wpage_proxy_bodyfiles目录下创建的指定文件 一个或多个（会自动忽略参数的path部分）
+
 # 删除mock文件
 wpage_proxy remove -d #删除整个文件目录 wpage_proxy_bodyfiles
 wpage_proxy remove index.html app.js  #删除wpage_proxy_bodyfiles目录下的指定文件 一个或多个（会自动忽略参数的path部分）
