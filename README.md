@@ -56,33 +56,33 @@ wpage_proxy
 # 交互式方式在当前工作目录创建基础配置文件
 wpage_proxy init
 
-# 使用vscode打开当前工作目录的配置文件及wpage_proxy_bodyfiles目录
-wpage_proxy open
-
-# 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
-wpage_proxy clean
-
 # 查看当前目录下的配置文件及wpage_proxy_bodyfiles目录下的文件 并且分3部分显示
 # 1 显示 proxy.config.js 文件 及文件大小  （如果有时）
 # 2 显示 wpage_proxy_bodyfiles 目录中的文件及大小 （如果有时）
 # 3 显示 wpage_proxy_bodyfiles 目录中的文件名 用空格隔开 （便于拷贝进行别的操作等）
 wpage_proxy ls
 
-# 创建mock文件
+# 使用vscode打开当前工作目录的配置文件及wpage_proxy_bodyfiles目录
+wpage_proxy open
+
+# 创建mock文件件到./wpage_proxy_bodyfiles目录
 wpage_proxy touch index.html app.js  #在wpage_proxy_bodyfiles目录下创建的指定文件 一个或多个（会自动忽略参数的path部分）
+
+# 从远程下载mock文件到./wpage_proxy_bodyfiles目录 示例：wpage_proxy down index.html https://www.baidu.com/
+wpage_proxy down 文件名 远程资源url
+wpage_proxy down index.html https://www.baidu.com/ # 将百度首页下载到./wpage_proxy_bodyfiles/index.html
 
 # 删除mock文件
 wpage_proxy remove -d #删除整个文件目录 wpage_proxy_bodyfiles
 wpage_proxy remove index.html app.js  #删除wpage_proxy_bodyfiles目录下的指定文件 一个或多个（会自动忽略参数的path部分）
 
-# 下载远程资源到本地./wpage_proxy_bodyfiles目录 示例：wpage_proxy down index.html https://www.baidu.com/
-wpage_proxy down 文件名 远程资源url
-wpage_proxy down index.html https://www.baidu.com/ # 将百度首页下载到./wpage_proxy_bodyfiles/index.html
+# 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
+wpage_proxy clean
 
 # 使用当前工作目录下的配置文件启动代理服务
 wpage_proxy
 
-# 只用指定目录下的配置文件启动代理服务
+# 只用指定目录下的配置文件启动代理服务(不建议使用)
 wpage_proxy /xxx/yyy/xxx/
 
 ```
