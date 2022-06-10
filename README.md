@@ -160,7 +160,6 @@ wpage_proxy /xxx/yyy/xxx/
   - `query_o` 请求url的参数部分（对象形式）
   - `hash` 请求url中的hash部分
   
-
   - `nurl` 通过代理请求的新url
   - `norigin` 通过代理浏览器使用的真实域名（包含协议和端口）
   - `nhostname` 通过代理浏览器使用的真实域名（不包含协议及端口）
