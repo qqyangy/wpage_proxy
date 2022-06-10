@@ -158,17 +158,14 @@ wpage_proxy /xxx/yyy/xxx/
   - `pathname` path部分
   - `query` 请求url的参数部分（字符串形式）
   - `query_o` 请求url的参数部分（对象形式）
-  - `hash` 请求url中的hash部分
-  
+  - `hash` 请求url中的hash部
   - `nurl` 通过代理请求的新url
   - `norigin` 通过代理浏览器使用的真实域名（包含协议和端口）
   - `nhostname` 通过代理浏览器使用的真实域名（不包含协议及端口）
-
   - `localIp` 代理服务器id地址
   - `keepInsert` 配置项中keepInsert的配置内容
   - `proxyLocation` proxyLocation配置项
   - `mapUrl` mapUrl配置项
-
   - `hosts` 代理组域名映射信息
   - `tools` 数据转换工具包
     - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值
