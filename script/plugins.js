@@ -176,14 +176,14 @@ const plugins={
     return html.replace("<head>",`<head>${scripts.join("\n")}`);
   },
   // 处理配置项的module字段
-  moduleCode(text,h,{hosts,localIp,contentType,newOrigin}){
+  moduleCode(text,h,{hosts,localIp,contentType,norigin}){
     if(/html|javascript/.test(contentType)){
       hosts.forEach((o,index)=>{
         let i=0;
         const host="//"+o.host.split("//")[1];
         while((i=text.indexOf(host,i))!==-1){
           const reg=new RegExp(`(https?:)?${host}`);
-          text=text.replace(reg,index===0?newOrigin:`http://${localIp}:${o.localPort}`);
+          text=text.replace(reg,index===0?norigin:`http://${localIp}:${o.localPort}`);
         }
       })
     }
@@ -194,9 +194,10 @@ const plugins={
     return /html|javascript/.test(contentType)?text.replace(/\blocation\b/gm,"proxyLocation"):text;
   },
   //向html中添加js脚本
-  addScripts(scripts,text,h,{contentType,url}){
+  addScripts(scripts,text,h,env){
+    const {contentType,url}=env;
     if(contentType && contentType.includes("html") && text && /<html/i.test(text) && scripts && scripts.constructor===Object && scripts.test){
-      if(!utils.urlTest(url,scripts.test)) return text; // 如果有test条件 但验证不通过则不处理
+      if(!utils.urlTest(url,scripts.test,env)) return text; // 如果有test条件 但验证不通过则不处理
       const numkeys=Object.keys(scripts).map(n=>Number(n)).filter(n=>!Number.isNaN(n));
       numkeys.forEach(n=>{
         const o=scripts[n];

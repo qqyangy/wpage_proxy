@@ -9,12 +9,13 @@ const getObject=(d,env)=>{
   return rd&&rd.constructor===Object?rd:undefined;
 },
 //对url进行条件验证
-urlTest=(url,testdt,isitem=false)=>{
+urlTest=(url,testdt,env,isitem=false)=>{
   if(!testdt || !url) return true; //如果无限制条件直接通过
   const testfunc={
     "[object String]":()=>url.includes(testdt),//验证字符串
     "[object RegExp]":()=>testdt.test(url),//验证正则
-    "[object Array]":()=>!isitem?testdt.every(v=>urlTest(url,v,true)):true//验证数组 非第一层数组直接验证通过
+    "[object Function]":()=>testdt(env),//验证函数
+    "[object Array]":()=>!isitem?testdt.every(v=>urlTest(url,v,env,true)):true//验证数组 非第一层数组直接验证通过
   }[Object.prototype.toString.call(testdt)];//提取当前类型的验证函数
   return testfunc?testfunc():true;//如果找到对应类型验证函数则使用对应验证函数验证 否则直接验证通过
 },
@@ -137,7 +138,7 @@ function formatResCfg(res,url,results,env){
     "[object Array]":()=>res.forEach(o=>formatResCfg(o,url,results,env)),
     "[object Object]":()=>{
       if("test" in res){
-        if(!urlTest(url,res.test)) return;//有test但验证不通过
+        if(!urlTest(url,res.test,env)) return;//有test但验证不通过
       }
       const headers=res.headers&&(res.headers.constructor===Object||res.headers.constructor===Function)&&res.headers; //获取配置的headers
       switch(true){

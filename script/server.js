@@ -90,26 +90,33 @@ http.createServer((req,res)=>{
     path:req.url,
     url:`${protocol}://${hostname}${port?`:${port}`:""}${req.url}`
   };
+  const urlParse=url.parse(options.url),
+  urlParsepick=["protocol","hostname","pathname","hash","query"].reduce((o,k)=>(o[k]=urlParse[k]||"",o),{});
+  urlParsepick.query_o=urlParsepick.query.split("&").reduce((o,s)=>{
+    const pair=s.split("=");
+    return o[pair[0]]=pair[1]||"",o;
+  },{});
   //定制环境数据
   const env={
+    ...urlParsepick,
     keepInsert:!!confg.keepInsert,
     url:options.url,
-    ourl:hosts[index].host+req.url,
+    // ourl:hosts[index].host+req.url,
     path:req.url,
     proxyLocation:confg.proxyLocation,
     mapUrl:(v=>{
       return v && v instanceof Array && (v.length>0 && !(v[0] instanceof Array)?[v]:v) || [];
     })(configall.mapUrl).filter(a=>a.length>1).map(a=>a.length>3?a.splice(0,3):a),
-    oldOrigin:hosts[index].host,
-    newOrigin:(t=>{
+    origin:hosts[index].host,
+    norigin:(t=>{
       return utils.urlformat(t,"http",localPort);
     })(req.headers.origin?req.headers.origin:(req.headers.host||"localhost:3001")),
     localIp,
-    hostName:url.parse(utils.urlformat(req.headers.host||req.headers.origin)).hostname,
+    nhostname:url.parse(utils.urlformat(req.headers.host||req.headers.origin)).hostname,
     hosts,
     tools:utils.tools
   };
-  env.nurl=env.newOrigin+req.url;//新的url
+  env.nurl=env.norigin+req.url;//新的url
 
 
 

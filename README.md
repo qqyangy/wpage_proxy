@@ -111,10 +111,11 @@ wpage_proxy /xxx/yyy/xxx/
   - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取
   - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认falses
   - `scripts` `:object` 要插入html的js脚本
-      - `test` `:string|:regexp|:array` 确定要是用的脚本植入的被代理请求的url
+      - `test` `:string|:regexp|:function|:array` 确定要是用的脚本植入的被代理请求的url
           - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
           - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
-          - `:array` 每个item必须为字符串或正则 其他类型会被忽略 全部验证通过则通过否则未不通过
+          - `:function` 调用指定函数`text(env)`获取返回值验证
+          - `:array` 每个item必须为字符串或正则或函数 其他类型会被忽略 全部验证通过则通过否则未不通过
       - `数字key` `:object|:string` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中
           > content、file、url同时配置多个时生效优先级最高的（使用string类型时与只有url属性的对象相同,且url值与指定的string一致）
           - `content` `:string` 要插入的脚本内容 优先级3
@@ -149,17 +150,26 @@ wpage_proxy /xxx/yyy/xxx/
       - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
 
 ### env 包属性
-  - `keepInsert` 配置项中keepInsert的配置内容
   - `url`  原始请求url
-  - `ourl` 原始请求url（与url一致）
-  - `nurl` 通过代理请求的新url
+  - `origin` 原请求域名（包含协议和端口）
+  - `protocol` 原请求协议
+  - `hostname` 原始请求的域名（不包含协议及端口）
   - `path` path及请求参数部分
+  - `pathname` path部分
+  - `query` 请求url的参数部分（字符串形式）
+  - `query_o` 请求url的参数部分（对象形式）
+  - `hash` 请求url中的hash部分
+  
+
+  - `nurl` 通过代理请求的新url
+  - `norigin` 通过代理浏览器使用的真实域名（包含协议和端口）
+  - `nhostname` 通过代理浏览器使用的真实域名（不包含协议及端口）
+
+  - `localIp` 代理服务器id地址
+  - `keepInsert` 配置项中keepInsert的配置内容
   - `proxyLocation` proxyLocation配置项
   - `mapUrl` mapUrl配置项
-  - `oldOrigin` 原请求域名（包含协议和端口）
-  - `newOrigin` 通过代理请求域名（包含协议和端口）
-  - `localIp` 代理服务器id地址
-  - `hostName` 浏览器使用的域名（不包含协议及端口）
+
   - `hosts` 代理组域名映射信息
   - `tools` 数据转换工具包
     - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值
