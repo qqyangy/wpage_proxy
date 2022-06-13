@@ -15,7 +15,7 @@ module.exports={
       server:$server,
       res:[
         {
-            test:"",
+            test:"xxx/yyy/zzz",
             handler(d,h,{tools}){
               // tools.jsonReset(d,{"data.availBalance":200});
               return d;
