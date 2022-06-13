@@ -12,8 +12,10 @@ const formatScript=o=>{
     return `<script ${iattrs}>${content}</script>`
   }
   if(file){
-    const filepath=path.resolve(process.cwd(),file);
-    return fs.existsSync(filepath)&&`<script ${iattrs}>${fs.readFileSync(filepath)}</script>`;
+    const filepath1=path.resolve(process.cwd(),file),
+    filepath2=path.resolve(process.cwd(),"./wpage_proxy_bodyfiles/",file),
+    filepath=fs.existsSync(filepath1) && filepath1 || fs.existsSync(filepath2) && filepath2;
+    return filepath && `<script ${iattrs}>${fs.readFileSync(filepath)}</script>`;
   }
   if(url){
     return `<script src="${url}"${iattrs}></script>`
@@ -200,8 +202,10 @@ const plugins={
       if(!utils.urlTest(url,scripts.test,env)) return text; // 如果有test条件 但验证不通过则不处理
       const numkeys=Object.keys(scripts).map(n=>Number(n)).filter(n=>!Number.isNaN(n));
       numkeys.forEach(n=>{
-        const o=scripts[n];
-        return o && typeof o ==="string" && /^https?:\/\/\w+?/.test(o) && (scripts[n]={url:o});//转换直接url为对象url属性
+        const o=scripts[n],
+        url=o && typeof o ==="string",
+        fkey=/^\w+(\.\w+)*$/.test(o)?"file":"url";
+        return url && (scripts[n]={[fkey]:o});//转换直接url为对象url属性
       });
       const skeys=numkeys.filter(k=>(scripts[k] && scripts[k].constructor===Object));
       const headn=skeys.filter(n=>n>=0&&n<100).sort((a,b)=>a-b),
