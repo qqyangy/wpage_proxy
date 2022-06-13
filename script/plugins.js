@@ -210,9 +210,10 @@ const plugins={
       const skeys=numkeys.filter(k=>(scripts[k] && scripts[k].constructor===Object));
       const headn=skeys.filter(n=>n>=0&&n<100).sort((a,b)=>a-b),
       bodyn=skeys.filter(n=>n>=100).sort((a,b)=>a-b),
-      headOutHtml=/<head\b[\W\w]*<\/head>/;
+      headOutHtml=/<head\b[\W\w]*<\/head>/,
+      bodyOutHtml=/<body\b[\W\w]*<\/body>/;
       headn.length>0 && (text=text.replace(headOutHtml,htext=>insertScript(htext,headn,scripts,"</head>")));
-      bodyn.length>0 && (text=text.replace(headOutHtml,btext=>insertScript(btext,bodyn,scripts,"</body>")));
+      bodyn.length>0 && (text=text.replace(bodyOutHtml,btext=>insertScript(btext,bodyn,scripts,"</body>")));
     }
     return text;
   }
