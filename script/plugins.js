@@ -54,7 +54,7 @@ createMapUrl=mps=>{
     const ou=mapurls.find(a=>url.includes(a[0]))||["",""], //提取原始origin
     ourl=url.replace(ou[0],ou[1]);//还原url
     return mps.filter(a=>{
-      return a.length>1 && typeof a[1]==="function" && (typeof a[0]==="string" && ourl.includes(a[0]) || a[0].constructor===RegExp && a[0].test(ourl));
+      return a.length>1 && typeof a[1]==="function" && (typeof a[0]==="string" && ourl.includes(a[0]) || a[0].constructor===RegExp && a[0].test(ourl) || a[0] instanceof Function && a[0](ourl));
     }).reduce((r,a)=>{
       return {url:a[1](r.url,hosts),skip:!!a[2]};
     },{url:ourl,skip:false});
