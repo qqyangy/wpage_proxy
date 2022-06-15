@@ -79,15 +79,9 @@ const corsHeader={
 
 http.createServer((req,res)=>{
   req.headers.origin&&Object.assign(corsHeader,{"Access-Control-Allow-Origin":req.headers.origin});//允许对当前域跨域
-  if(localPort>9000){
-    console.log("1111--",req.method,corsHeader);
-  }
   if (req.method == 'OPTIONS') {
     res.writeHead(204,corsHeader);
     return res.end();
-  }
-  if(localPort>9000){
-    console.log("2222");
   }
   const options={
     type:protocol,
@@ -153,14 +147,8 @@ http.createServer((req,res)=>{
   req.pipe(reqStream);
   reqPromise.then(({optins:reqOptions,data:reqdata})=>{
     const resStream=new MyWriteStream();//响应数据中转流
-    if(localPort>9000){
-      console.log(">>>>>>>1111",env.path);
-    }
     // 发起请求
     const reqs2=request(reqOptions,(err,res2)=>{
-      if(localPort>9000){
-        console.log(">>>>>>>");
-      }
       const _res2=res2||{};
       if(err || !_res2.statusCode || _res2.statusCode >= 500){
         res.writeHead(_res2.statusCode||500,_res2.headers||{});
