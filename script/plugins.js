@@ -147,7 +147,7 @@ cssAndJstxt=()=>{
 // 包括函数的数组转字符串
 fucArry2text=(ary)=>{
   const keymamfuncs=[];
-  const sary=JSON.stringify(ary,(k,v)=>v instanceof Function?(()=>{
+  const sary=JSON.stringify(ary,(key,v)=>(v instanceof Function || v instanceof RegExp)?(()=>{
     const k=`json-string-to-function-num${keymamfuncs.length}-reduction`;
     return keymamfuncs.push([k,v]),k;
   })():v);
