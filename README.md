@@ -37,8 +37,11 @@ sudo npm run i
 # 进入工作目录
 cd /xxx/xxx/xxx/
 
-# 创建配置文件 并写入nodejs 模块得导出代码
-echo "module.exports={}" > proxy.config.js
+# 初始化一个代理服务配置环境
+wpage_proxy init
+
+# 代开配置文件进行更详细编辑
+wpage_proxy open
 
 # 使用开发工具打开配置文件 在{}中完善配置，配置方式参照配置项明细
 
