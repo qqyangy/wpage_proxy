@@ -2,9 +2,9 @@ const child_process=require("child_process"),
 path=require("path"),
 fs=require("fs"),
 utils=require("./script/utils.js");
-const configpath=path.resolve(process.cwd(),"./proxy.config.js");
+const configpath=path.resolve(process.cwd(),"./wproxy.config.js");
 if(!fs.existsSync(configpath)){
-  return console.log("缺少配置文件：proxy.config.js 你可以选择如下任一方式创建：\n1.使用 wpage_proxy init 命令创建 \n2.手动创建");
+  return console.log("缺少配置文件：wproxy.config.js 你可以选择如下任一方式创建：\n1.使用 wpage_proxy init 命令创建 \n2.手动创建");
 }
 const localIp=utils.getIPAddress();
 console.log("当前主机IP地址:",localIp);

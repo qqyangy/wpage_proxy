@@ -20,7 +20,7 @@ urlTest=(url,testdt,env,isitem=false)=>{
   return testfunc?testfunc():true;//如果找到对应类型验证函数则使用对应验证函数验证 否则直接验证通过
 },
 //配置文档path
-configPath=path.resolve(process.cwd(),"./proxy.config.js"),
+configPath=path.resolve(process.cwd(),"./wproxy.config.js"),
 // 获取正确的body数据
 getBodyData=(d,env)=>{
   return typeof d === "function"?d(env):d

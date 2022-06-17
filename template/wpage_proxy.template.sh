@@ -12,8 +12,8 @@ then
 fi;
 
 # 判断是否传入目录参数 如果有则切换到指定目录
-runpath=${1%proxy.config.js*};
-if [[ "$runpath" != "" && -f "${runpath%/}/proxy.config.js" ]];then
+runpath=${1%wproxy.config.js*};
+if [[ "$runpath" != "" && -f "${runpath%/}/wproxy.config.js" ]];then
   cd $runpath;
 fi;
 # 运行代理程序

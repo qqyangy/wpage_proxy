@@ -49,7 +49,7 @@ wpage_proxy
 ```
 
 ### 使用方式
-- 1.添加配置文件 `proxy.config.js`
+- 1.添加配置文件 `wproxy.config.js`
 - 2.在配置文件目录运行 如：`wpage_proxy [path]`
 
 ### 子命令及参数
@@ -58,7 +58,7 @@ wpage_proxy
 wpage_proxy init
 
 # 查看当前目录下的配置文件及wpage_proxy_bodyfiles目录下的文件 并且分3部分显示
-# 1 显示 proxy.config.js 文件 及文件大小  （如果有时）
+# 1 显示 wproxy.config.js 文件 及文件大小  （如果有时）
 # 2 显示 wpage_proxy_bodyfiles 目录中的文件及大小 （如果有时）
 # 3 显示 wpage_proxy_bodyfiles 目录中的文件名 用空格隔开 （便于拷贝进行别的操作等）
 wpage_proxy ls

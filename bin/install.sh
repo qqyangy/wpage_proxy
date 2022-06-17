@@ -6,10 +6,10 @@
 echo "依赖安装完成,准备安装全局命令"
 
 #拷贝文件可执行文件
-cp ./bin/wpage_proxy.templete.sh ./bin/wpage_proxy.sh;
+cp ./template/wpage_proxy.template.sh ./bin/wpage_proxy.sh;
 
 #重置执行文件路劲
-cat ./bin/wpage_proxy.templete.sh | sed "s#^wpage_proxy_path.*\$#wpage_proxy_path=$PWD/#" > ./bin/wpage_proxy.sh; 
+cat ./template/wpage_proxy.template.sh | sed "s#^wpage_proxy_path.*\$#wpage_proxy_path=$PWD/#" > ./bin/wpage_proxy.sh; 
 
 binpath=$(which node | sed "s#node\$#wpage_proxy#");
 if [[ $binpath =~ wpage_proxy ]];then

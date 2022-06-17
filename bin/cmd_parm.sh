@@ -5,9 +5,9 @@ then
   if [[ $1 == clean ]];
   then
     # 删除配置
-    if [[ -f ./proxy.config.js  ]];
+    if [[ -f ./wproxy.config.js  ]];
     then
-      rm -f ./proxy.config.js;
+      rm -f ./wproxy.config.js;
     fi;
     # 删除bodyfile目录
     if [[ -d ./wpage_proxy_bodyfiles ]];
@@ -53,10 +53,10 @@ then
    # 运行ls命令
   if [[ $1 == ls ]];
   then
-    if [[ -f ./proxy.config.js ]];
+    if [[ -f ./wproxy.config.js ]];
     then
       echo;
-      ls -lh | awk '$9=="proxy.config.js"{printf "%-40s%10s\n",$9,$5;}'
+      ls -lh | awk '$9=="wproxy.config.js"{printf "%-40s%10s\n",$9,$5;}'
       echo "----------------------------------------------------------------"
     fi;
     if [[ -d ./wpage_proxy_bodyfiles ]];
@@ -127,7 +127,7 @@ then
       then
          open -a "/Applications/$cmd/" ./wpage_proxy_bodyfiles;
       fi;
-      open -a "/Applications/$cmd/" ./proxy.config.js;
+      open -a "/Applications/$cmd/" ./wproxy.config.js;
     else
       open .;
       echo "找不到vscode应用,请手动打开"

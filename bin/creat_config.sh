@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if [[ -f ./proxy.config.js ]];
+if [[ -f ./wproxy.config.js ]];
 then
   while [ -z $isremove ];
   do
-    echo -e "\033[33m当前目录已存在./proxy.config.js配置文件是否要删除已有配置重建? (y/n) :\033[0m \c";
+    echo -e "\033[33m当前目录已存在./wproxy.config.js配置文件是否要删除已有配置重建? (y/n) :\033[0m \c";
     read isremove;
   done;
   if [ $isremove == "n" ];
@@ -24,7 +24,7 @@ read localPort;
 localPort=${localPort:-5200};
 
 # 生成配置文件
-cat ${wpage_proxy_path}proxy.config.templat.js | awk -v server="$server" -v localPort="$localPort" -F ":" -v OFS=":" '{
+cat ${wpage_proxy_path}template/wproxy.config.template.js | awk -v server="$server" -v localPort="$localPort" -F ":" -v OFS=":" '{
   if(NF==2){
     if($2=="$server,"){
       $2="\""server"\",";
@@ -33,7 +33,7 @@ cat ${wpage_proxy_path}proxy.config.templat.js | awk -v server="$server" -v loca
     }
   }
   print $0;
-}' > ./proxy.config.js;
+}' > ./wproxy.config.js;
 
 
 if [ $? -eq 0 ]
