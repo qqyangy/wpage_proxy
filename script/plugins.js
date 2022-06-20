@@ -81,7 +81,7 @@ xhrTxt=()=>{
 },
 // 设置location
 creatLocation=()=>{
-    const loc=window.proxyLocation={};
+    const loc=window.proxyLocation=document.proxyLocation={};
     loc.__proto__=location.__proto__;
     const pagehost=hosts[0],
     getval={
