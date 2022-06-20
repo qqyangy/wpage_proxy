@@ -2,7 +2,7 @@
 if [[ $# -ge 1 ]];
 then
   # 运行clean命令
-  if [[ $1 == clean ]];
+  if [[ $1 == clean || $1 == cl ]];
   then
     # 删除配置
     if [[ -f ./wproxy.config.js  ]];
@@ -69,7 +69,7 @@ then
     exit 0;
   fi;
    # 运行remove命令
-  if [[ $1 == remove ]];
+  if [[ $1 == remove || $1 == rm ]];
   then
     if [[ $# -lt 2 ]];
     then
@@ -148,6 +148,12 @@ then
     else
      echo -e "\033[31m缺少下载参数,正确下载命令格式为：\033[33m wpage_proxy down 文件名 远程资源url\033[0m";
     fi;
+    exit 0
+  fi;
+  # 美化文件代码
+  if [[ $1 == beautify || $1 == be ]];
+  then
+    node ${wpage_proxy_path}bin/beautifyFile.js ${*:2:$#};
     exit 0
   fi;
 fi;
