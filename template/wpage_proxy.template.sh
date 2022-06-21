@@ -11,6 +11,12 @@ then
  exit 0;
 fi;
 
+# 参数数量大于则直接退出
+if [[ $# -gt 0 ]];
+then
+  exit 0;
+fi;
+
 # 判断是否传入目录参数 如果有则切换到指定目录
 runpath=${1%wproxy.config.js*};
 if [[ "$runpath" != "" && -f "${runpath%/}/wproxy.config.js" ]];then

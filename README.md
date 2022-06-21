@@ -86,9 +86,6 @@ wpage_proxy beautify || wpage_proxy be
 # 使用当前工作目录下的配置文件启动代理服务
 wpage_proxy
 
-# 只用指定目录下的配置文件启动代理服务(不建议使用)
-wpage_proxy /xxx/yyy/xxx/
-
 ```
 
 ### 配置项明细
