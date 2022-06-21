@@ -1,4 +1,10 @@
 #!/bin/bash
+
+#获取当前目录
+if [ ${PWD##*/} == "wpage_proxy_bodyfiles" ];
+then
+  cd ..;
+fi;
 if [[ $# -ge 1 ]];
 then
   # 运行clean命令
@@ -79,12 +85,12 @@ then
       then
         if [[ -d ./wpage_proxy_bodyfiles ]];
         then
-          rm -rf ./wpage_proxy_bodyfiles;
+          rm -rf ./wpage_proxy_bodyfiles/*;
            if [[ $? -eq 0 ]];
            then
-              echo -e "\033[32m删除 ./wpage_proxy_bodyfiles 目录成功！\033[0m"
+              echo -e "\033[32m删除 ./wpage_proxy_bodyfiles 目录文件成功！\033[0m"
            else
-              echo -e "\033[31m删除 ./wpage_proxy_bodyfiles 目录失败！\033[0m"
+              echo -e "\033[31m删除 ./wpage_proxy_bodyfiles 目录文件失败！\033[0m"
            fi;
         else
           echo '不存在目录：./wpage_proxy_bodyfiles'
@@ -123,8 +129,9 @@ then
     cmd=$(ls /Applications | egrep -i "Visual\s+Studio\s+Code");
     if [[ "$cmd" != "" ]];
     then
-      if [[ -d ./wpage_proxy_bodyfiles ]];
+      if [[ ! -d ./wpage_proxy_bodyfiles ]];
       then
+         mkdir wpage_proxy_bodyfiles;
          open -a "/Applications/$cmd/" ./wpage_proxy_bodyfiles;
       fi;
       open -a "/Applications/$cmd/" ./wproxy.config.js;
