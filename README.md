@@ -50,7 +50,7 @@ wpage_proxy
 
 ### 使用方式
 - 1.添加配置文件 `wproxy.config.js`
-- 2.在配置文件目录运行 如：`wpage_proxy [path]`
+- 2.在配置文件目录运行 如：`wpage_proxy`
 
 ### 子命令及参数
 ```sh
