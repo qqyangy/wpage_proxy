@@ -96,6 +96,20 @@ then
           echo '不存在目录：./wpage_proxy_bodyfiles'
         fi;
        exit 0;
+      elif [ $2 == "-z" ];
+      then
+        #删除大小未0的文件
+        if [ -d ./wpage_proxy_bodyfiles ];
+        then
+          find ./wpage_proxy_bodyfiles -size 0c -exec rm -f {} \;
+           if [[ $? -eq 0 ]];
+           then
+              echo -e "\033[32m删除空文件成功！\033[0m"
+           else
+              echo -e "\033[31m删除空文件失败！\033[0m"
+           fi;
+        fi;
+        exit 0;
       fi;
       args=($*);
       for ((i=1;i<${#args[*]};i++)){

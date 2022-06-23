@@ -74,7 +74,9 @@ wpage_proxy down 文件名 远程资源url
 wpage_proxy down index.html https://www.baidu.com/ # 将百度首页下载到./wpage_proxy_bodyfiles/index.html
 
 # 删除mock文件
-wpage_proxy remove -d || wpage_proxy rm #删除整个文件目录 wpage_proxy_bodyfiles
+wpage_proxy remove || wpage_proxy rm 
+wpage_proxy rm -d #删除整个文件目录 wpage_proxy_bodyfiles下所有文件
+wpage_proxy rm -z #删除整个文件目录 wpage_proxy_bodyfiles下所有空文件
 wpage_proxy remove index.html app.js  #删除wpage_proxy_bodyfiles目录下的指定文件 一个或多个（会自动忽略参数的path部分）
 
 # 删除当前工目录的配置文件和wpage_proxy_bodyfiles目录及子文件
