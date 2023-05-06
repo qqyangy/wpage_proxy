@@ -155,7 +155,7 @@ http.createServer((req, res) => {
       resStream.then(d => {
         try {
           const resultdata = execcontent(d);
-          res.writeHead(resultdata.statusCode || res.statusCode || 200, Object.assign(headers, resultdata.headers, corsHeader));
+          res.writeHead(resultdata.statusCode || res.statusCode || 200, Object.assign(resultdata.headers, corsHeader));
           res.end(resultdata.body);
         } catch (e) {
           console.log("Error", e);
