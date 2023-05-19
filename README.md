@@ -26,7 +26,7 @@
 ### 安装
 ```sh
 # 克隆项目
-git clone http://gitlab.17zuoye.net:10080/yong.yang/wpage_proxy.git
+git clone http://xxx.xxx.xxx/wpage_proxy.git
 
 # 进入项目文件夹
 cd wpage_proxy
