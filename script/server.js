@@ -77,9 +77,23 @@ const corsHeader = {
   // "Access-Control-Expose-Headers": "Authorization",
   "Access-Control-Allow-Credentials": "true"
 };
+const accessControlRequestHeaders = (reqHeaders) => {
+  const keys = ["access-control-request-headers", "Access-Control-Request-Headers"],
+    lenth = keys[0].length,
+    key = keys.find(t => t in reqHeaders) || Object.keys(reqHeaders).find(t => {
+      if (t.length !== keys[0].length) return "";
+      return /^access-control-request-headers$/i.test(t);
+    });
+  if (!key) return "";
+  return reqHeaders[key];
+}
 
 http.createServer((req, res) => {
   req.headers.origin && Object.assign(corsHeader, { "Access-Control-Allow-Origin": req.headers.origin });//允许对当前域跨域
+  const requestHeaders = accessControlRequestHeaders(req.headers || {});
+  if (requestHeaders) {
+    corsHeader["Access-Control-Allow-Headers"] += `,${requestHeaders}`;
+  }
   if (req.method == 'OPTIONS') {
     res.writeHead(204, corsHeader);
     return res.end();
