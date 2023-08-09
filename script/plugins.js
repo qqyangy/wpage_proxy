@@ -134,17 +134,26 @@ const formatScript = o => {
   },
   //设置通过dom加载的外部资源
   domloadsource = () => {
-    [HTMLScriptElement, HTMLStyleElement, HTMLImageElement, HTMLVideoElement, HTMLAudioElement].forEach(function (o) {
-      var _prototype = o.prototype;
-      var oldDefSrc = Object.getOwnPropertyDescriptor(_prototype, "src");
-      Object.defineProperty(_prototype, "src", {
+    [
+      [HTMLScriptElement, "src"],
+      [HTMLLinkElement, "href"],
+      [HTMLImageElement, "src"],
+      [HTMLVideoElement, "src"],
+      [HTMLAudioElement, "src"],
+      [HTMLIFrameElement, "src"]
+    ].forEach(function (a) {
+      var o = a[0],
+        attr = a[1],
+        _prototype = o.prototype;
+      var oldDefSrc = Object.getOwnPropertyDescriptor(_prototype, attr);
+      Object.defineProperty(_prototype, attr, {
         get() {
           return oldDefSrc.get.call(this);
         },
         set(v) {
           oldDefSrc.set.call(this, filterUrl(v));
         }
-      })
+      });
     })
   },
   // 包括函数的数组转字符串
