@@ -5,26 +5,17 @@
 
 echo "依赖安装完成,准备安装全局命令"
 
-#拷贝文件可执行文件
-cp ./template/wpage_proxy.template.sh ./bin/wpage_proxy.sh;
+if which wpage_proxy > /dev/null 2>&1;then
+    echo "当前环境已安装,无需重复安装"
+    exit;
+fi;
 
 #重置执行文件路劲
-cat ./template/wpage_proxy.template.sh | sed "s#^wpage_proxy_path.*\$#wpage_proxy_path=$PWD/#" > ./bin/wpage_proxy.sh; 
+cat ./template/wpage_proxy.template.sh | sed "s#^wpage_proxy_path.*\$#wpage_proxy_path=$PWD/#" > ./bin/wpage_proxy.sh;
 
-binpath=$(which node | sed "s#node\$#wpage_proxy#");
-if [[ $binpath =~ wpage_proxy ]];then
-    echo "安装路径:${binpath}"
-else
-    echo "安装路劲生成失败";
-    exit 1;
-fi
-# 生成运行程序软连
-if [ -f `which node` ];then
-  echo 存在文件
+if ! test -f ~/.bashrc;then
+    test -f ~/.bash_profile && grep wpage_proxy < ~/.bash_profile > /dev/null 2>&1 || echo ". ~/.bashrc" > ~/.bash_profile
 fi;
-rm -f $binpath;
-ln ./bin/wpage_proxy.sh $binpath;
-
-# 生成全局变量
-export wpage_proxy=$binpath;
+echo "alias wpage_proxy=$PWD/bin/wpage_proxy.sh" >> ~/.bashrc;
+. ~/.bashrc;
 echo 安装成功！
