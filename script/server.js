@@ -115,6 +115,8 @@ http.createServer((req, res) => {
   const env = {
     ...urlParsepick,
     keepInsert: !!confg.keepInsert,
+    localStorage: confg.localStorage,
+    sessionStorage: confg.sessionStorage,
     url: options.url,
     // ourl:hosts[index].host+req.url,
     path: req.url,

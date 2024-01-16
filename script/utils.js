@@ -313,7 +313,7 @@ module.exports = {
     const configall = require(configPath),//读取配置
       confgs = (d => d instanceof Array ? d : [d])(configall.proxy).filter(o => o.server).map(o => (!/^\w+:\/\//.test(o.server) && (o.server = 'http://' + o.server), o)); //获取全部配置
     //配置可继承属性
-    ["cookie", "module", "proxyLocation", "keepInsert", "setCookie"].forEach(k => {
+    ["cookie", "module", "proxyLocation", "keepInsert", "setCookie", "localStorage", "sessionStorage"].forEach(k => {
       configall.hasOwnProperty(k) && confgs.forEach(o => {
         !o.hasOwnProperty(k) && (o[k] = configall[k]);
       })

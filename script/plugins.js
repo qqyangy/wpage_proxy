@@ -170,11 +170,27 @@ const formatScript = o => {
   deletInsertCode = () => {
     const scriptinner = document.getElementById("proxy_insert_inner_script");
     scriptinner && scriptinner.parentNode.removeChild(scriptinner);// 移除支持的script标签
+  },
+  setInitStorage = (storage, storageTarget) => {
+    Object.keys(storage).forEach(k => {
+      var value = storage[k];
+      if (!value || !["[object String]", "[object Number]"].includes(Object.prototype.toString.call(value))) return;
+      storageTarget.setItem(k, value + "");
+    });
+  },
+  creatStorageString = (localStorage, sessionStorage) => {
+    const setInitStorageString = (localStorage || sessionStorage) && setInitStorage.toString(),
+      insertStorage = [
+        localStorage && `(${setInitStorageString})(${JSON.stringify(localStorage)}, localStorage)`,
+        sessionStorage && `(${setInitStorageString})(${JSON.stringify(sessionStorage)}, sessionStorage)`,
+      ].filter(v => v).join(";");
+    return insertStorage && insertStorage + ";";
   };
 const plugins = {
   //插入代码
-  insertInnerScript(html = "", h, { hosts, proxyLocation, mapUrl, keepInsert }) {
+  insertInnerScript(html = "", h, { hosts, proxyLocation, mapUrl, keepInsert, localStorage, sessionStorage }) {
     return html.replace("<head>", `<head><script id="proxy_insert_inner_script">(()=>{
+      ${creatStorageString(localStorage, sessionStorage)}
       const hosts=${JSON.stringify(hosts)},
       remapUrl=${mapUrl.length ? `(${createMapUrl.toString()})(${fucArry2text(mapUrl)})` : "u=>({url:u,skip:false})"};
       const filterUrl=${filterUrl.toString()};
