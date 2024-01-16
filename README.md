@@ -99,8 +99,8 @@ wpage_proxy
 - `proxyLocation` `:boolean` 使用代理浏览器location 【可被继承】（由于代理会使访问地址发生变化、继而可能会使前端判逻辑产生问题，可以开启此项配置修复）
 - `cookie` `:string` 被代理服务的cookie 可通过在控制台输入`document.cookie`获取 【可被继承】
 - `setCookie` `:boolean` 是否在前端页面种植配置的cookie（防止前端有使用js脚本验证cookie的情况存在）默认false【可被继承】
-- `localStorage` `:object` 需要默认注入的localStorage 【全局配置】
-- `sessionStorage` `:object` 需要默认注入的sessionStorage 【全局配置】
+- `localStorage` `:object` 需要默认注入的localStorage (值只能是string或number类型) 【全局配置】
+- `sessionStorage` `:object` 需要默认注入的sessionStorage (值只能是string或number类型) 【全局配置】
 - `keepInsert` `:boolean` 是否保留浏览器注入代码 默认false 【可被继承】
 - `mapUrl` `:array|:array二维` 配置请求url重置映射 【全局配置】
   - `:array` 只有一组时可使用
