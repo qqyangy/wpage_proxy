@@ -210,11 +210,14 @@ const plugins = {
     if (/html|javascript/.test(contentType)) {
       hosts.forEach((o, index) => {
         let i = 0;
-        const host = "//" + o.host.split("//")[1];
-        while ((i = text.indexOf(host, i)) !== -1) {
-          const reg = new RegExp(`(https?:)?${host}`);
-          text = text.replace(reg, index === 0 ? norigin : `http://${localIp}:${o.localPort}`);
-        }
+        const host = "//" + o.host.split("//")[1],
+          rHost = index === 0 ? norigin : `http://${localIp}:${o.localPort}`;
+        const regexp = new RegExp(`(https?:)?${host.replace(/\./g, "\\.")}(?!(\\d+|:\\d+))`, "g");
+        text = text.replace(regexp, rHost);
+        // while ((i = text.indexOf(host, i)) !== -1) {
+        //   const reg = new RegExp(`(https?:)?${host}`);
+        //   text = text.replace(reg, index === 0 ? norigin : `http://${localIp}:${o.localPort}`);
+        // }
       })
     }
     return text;
