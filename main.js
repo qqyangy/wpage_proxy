@@ -26,7 +26,7 @@ const servers = confgs.filter(o => o.server).map((c, i) => {
 const weinrePort = utils.weinrePort(configall);
 if (weinrePort) {
   //需要启动weinre
-  const ls = child_process.spawn("weinre", ["--httpPort", weinrePort, "--boundHost", "-all-"]);
+  const ls = child_process.spawn("weinre", ["--httpPort", weinrePort, "--boundHost", "-all-"], { shell: true });
   const weinreLog = configall.weinreLog || 0;
   weinreLog && [1, 3].includes(weinreLog) && ls.stdout.on('data', (data) => {
     console.log(`${data}`);
