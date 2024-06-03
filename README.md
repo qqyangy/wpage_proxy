@@ -119,7 +119,7 @@ wpage_proxy
       - `test` `:string|:regexp|:function|:array` 确定要是用的脚本植入的被代理请求的url
           - `:string` 使用`url.includes(test)`方式验证（是否包含指定字符）
           - `:regexp` 使用`test.test(url)`方式验证（url使用能与正则匹配）
-          - `:function` 调用指定函数`text(env)`获取返回值验证
+          - `:function` 调用指定函数`text(env)`获取返回值验证 如果函数形参数量为0则使用函数返回字符串与path(不带参数)进行`===`匹配 如：`()=>"/"`严格匹配path必须为`/`
           - `:array` 每个item必须为字符串或正则或函数 其他类型会被忽略 全部验证通过则通过否则未不通过
       - `数字key` `:object|:string` 配置要插入的脚本 key必须为数字类型或字符串数字类型[>=0] 数字越小脚本月靠前 小于100插入到head中 大于100插入到body中 （值为字符串类型时 带path部分直接转化为url字段 不带path及只有文件名时转化尾file字段）
           > content、file、url同时配置多个时生效优先级最高的（使用string类型时与只有url属性的对象相同,且url值与指定的string一致）

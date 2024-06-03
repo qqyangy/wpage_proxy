@@ -14,7 +14,7 @@ const getObject = (d, env) => {
     const testfunc = {
       "[object String]": () => url.includes(testdt),//验证字符串
       "[object RegExp]": () => testdt.test(url),//验证正则
-      "[object Function]": () => testdt(env),//验证函数
+      "[object Function]": () => testdt.length > 0 ? testdt(env) : testdt() === (env.path || "").split("?")[0],//验证函数(无参数则通过返回字符串与path对比否则根据返回的布尔值判断)
       "[object Array]": () => !isitem ? testdt.every(v => urlTest(url, v, env, true)) : true//验证数组 非第一层数组直接验证通过
     }[Object.prototype.toString.call(testdt)];//提取当前类型的验证函数
     return testfunc ? testfunc() : true;//如果找到对应类型验证函数则使用对应验证函数验证 否则直接验证通过
