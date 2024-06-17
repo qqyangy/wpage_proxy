@@ -89,101 +89,104 @@ const accessControlRequestHeaders = (reqHeaders) => {
 }
 
 http.createServer((req, res) => {
-  req.headers.origin && Object.assign(corsHeader, { "Access-Control-Allow-Origin": req.headers.origin });//允许对当前域跨域
-  const requestHeaders = accessControlRequestHeaders(req.headers || {});
-  if (requestHeaders) {
-    corsHeader["Access-Control-Allow-Headers"] += `,${requestHeaders}`;
-  }
-  if (req.method == 'OPTIONS') {
-    res.writeHead(204, corsHeader);
-    return res.end();
-  }
-  const options = {
-    type: protocol,
-    host: hostname,
-    port,
-    path: req.url,
-    url: `${protocol}://${hostname}${port ? `:${port}` : ""}${req.url}`
-  };
-  const urlParse = url.parse(options.url),
-    urlParsepick = ["protocol", "hostname", "pathname", "hash", "query"].reduce((o, k) => (o[k] = urlParse[k] || "", o), {});
-  urlParsepick.query_o = urlParsepick.query.split("&").reduce((o, s) => {
-    const pair = s.split("=");
-    return o[pair[0]] = pair[1] || "", o;
-  }, {});
-  //定制环境数据
-  const env = {
-    ...urlParsepick,
-    keepInsert: !!confg.keepInsert,
-    localStorage: confg.localStorage,
-    sessionStorage: confg.sessionStorage,
-    url: options.url,
-    // ourl:hosts[index].host+req.url,
-    path: req.url,
-    proxyLocation: confg.proxyLocation,
-    mapUrl: (v => {
-      return v && v instanceof Array && (v.length > 0 && !(v[0] instanceof Array) ? [v] : v) || [];
-    })(configall.mapUrl).filter(a => a.length > 1).map(a => a.length > 3 ? a.splice(0, 3) : a),
-    origin: hosts[index].host,
-    norigin: (t => {
-      return utils.urlformat(t, "http", localPort);
-    })(req.headers.origin ? req.headers.origin : (req.headers.host || "localhost:3001")),
-    localIp,
-    nhostname: url.parse(utils.urlformat(req.headers.host || req.headers.origin)).hostname,
-    hosts,
-    tools: utils.tools
-  };
-  env.nurl = env.norigin + req.url;//新的url
+  try {
+    req.headers.origin && Object.assign(corsHeader, { "Access-Control-Allow-Origin": req.headers.origin });//允许对当前域跨域
+    const requestHeaders = accessControlRequestHeaders(req.headers || {});
+    if (requestHeaders) {
+      corsHeader["Access-Control-Allow-Headers"] += `,${requestHeaders}`;
+    }
+    if (req.method == 'OPTIONS') {
+      res.writeHead(204, corsHeader);
+      return res.end();
+    }
+    const options = {
+      type: protocol,
+      host: hostname,
+      port,
+      path: req.url,
+      url: `${protocol}://${hostname}${port ? `:${port}` : ""}${req.url}`
+    };
+    const urlParse = url.parse(options.url),
+      urlParsepick = ["protocol", "hostname", "pathname", "hash", "query"].reduce((o, k) => (o[k] = urlParse[k] || "", o), {});
+    urlParsepick.query_o = urlParsepick.query.split("&").reduce((o, s) => {
+      const pair = s.split("=");
+      return o[pair[0]] = pair[1] || "", o;
+    }, {});
+    //定制环境数据
+    const env = {
+      ...urlParsepick,
+      keepInsert: !!confg.keepInsert,
+      localStorage: confg.localStorage,
+      sessionStorage: confg.sessionStorage,
+      url: options.url,
+      // ourl:hosts[index].host+req.url,
+      path: req.url,
+      proxyLocation: confg.proxyLocation,
+      mapUrl: (v => {
+        return v && v instanceof Array && (v.length > 0 && !(v[0] instanceof Array) ? [v] : v) || [];
+      })(configall.mapUrl).filter(a => a.length > 1).map(a => a.length > 3 ? a.slice(0, 3) : a),
+      origin: hosts[index].host,
+      norigin: (t => {
+        return utils.urlformat(t, "http", localPort);
+      })(req.headers.origin ? req.headers.origin : (req.headers.host || "localhost:3001")),
+      localIp,
+      nhostname: url.parse(utils.urlformat(req.headers.host || req.headers.origin)).hostname,
+      hosts,
+      tools: utils.tools
+    };
+    env.nurl = env.norigin + req.url;//新的url
 
 
 
-  const resConfig = utils.extractTrans(configall, confg, env)//获取配置中res项
-  if (resConfig.mock) {
-    const reshead = Object.assign({}, corsHeader);
-    const execcontent = configHandlerPickUp(reshead, req, resConfig, env, resConfig.res.bodyFile);
-    const resultdata = execcontent(resConfig.res.body);
-    resConfig.res.body = resultdata.body;
-    return utils.resMock({ req, res, resConfig, reshead }); // 处理mock结果
-  }
-  const nhost = port ? hostname + ":" + port : hostname,
-    headers = Object.assign(utils.deletekey(req.headers, ["accept-encoding", "if-none-match", "if-modified-since", "cache-control"]), {
-      host: nhost,
-      referer: (req.headers.referer || "").replace(req.headers.host, nhost)
-    })
-  if (confg.cookie) {
-    headers.cookie = confg.cookie; //有配置cookie时代理cookie
-  }
+    const resConfig = utils.extractTrans(configall, confg, env)//获取配置中res项
+    if (resConfig.mock) {
+      const reshead = Object.assign({}, corsHeader);
+      const execcontent = configHandlerPickUp(reshead, req, resConfig, env, resConfig.res.bodyFile);
+      const resultdata = execcontent(resConfig.res.body);
+      resConfig.res.body = resultdata.body;
+      return utils.resMock({ req, res, resConfig, reshead }); // 处理mock结果
+    }
+    const nhost = port ? hostname + ":" + port : hostname,
+      headers = Object.assign(utils.deletekey(req.headers, ["accept-encoding", "if-none-match", "if-modified-since", "cache-control"]), {
+        host: nhost,
+        referer: (req.headers.referer || "").replace(req.headers.host, nhost)
+      })
+    if (confg.cookie) {
+      headers.cookie = confg.cookie; //有配置cookie时代理cookie
+    }
 
-  const reqOptionsInit = {
-    ...options,
-    headers,
-    method: req.method
-  };
-  const reqConfig = utils.extractTrans(configall, confg, env, "req")//获取配置中req项
-  const { reqStream, reqPromise } = utils.reqFilter(reqOptionsInit, reqConfig, env);
-  req.pipe(reqStream);
-  reqPromise.then(({ optins: reqOptions, data: reqdata }) => {
-    const resStream = new MyWriteStream();//响应数据中转流
-    const axiosCfg = Object.assign({ data: reqdata, responseType: 'stream' }, reqOptions)
-    axios(axiosCfg).then((d) => {
-      d.data.pipe(resStream);
-      const execcontent = configHandlerPickUp(d.headers, req, resConfig, env);
-      resStream.then(d => {
-        try {
-          const resultdata = execcontent(d);
-          res.writeHead(resultdata.statusCode || res.statusCode || 200, Object.assign(resultdata.headers, corsHeader));
-          res.end(resultdata.body);
-        } catch (e) {
-          console.log("Error", e);
-        }
+    const reqOptionsInit = {
+      ...options,
+      headers,
+      method: req.method
+    };
+    const reqConfig = utils.extractTrans(configall, confg, env, "req")//获取配置中req项
+    const { reqStream, reqPromise } = utils.reqFilter(reqOptionsInit, reqConfig, env);
+    req.pipe(reqStream);
+    reqPromise.then(({ optins: reqOptions, data: reqdata }) => {
+      const resStream = new MyWriteStream();//响应数据中转流
+      const axiosCfg = Object.assign({ data: reqdata, responseType: 'stream' }, reqOptions)
+      axios(axiosCfg).then((d) => {
+        d.data.pipe(resStream);
+        const execcontent = configHandlerPickUp(d.headers, req, resConfig, env);
+        resStream.then(d => {
+          try {
+            const resultdata = execcontent(d);
+            res.writeHead(resultdata.statusCode || res.statusCode || 200, Object.assign(resultdata.headers, corsHeader));
+            res.end(resultdata.body);
+          } catch (e) {
+            console.log("Error1", env.url);
+          }
+        });
+      }).catch(error => {
+        console.log("Error2", env.url);
+        res.statusCode = error && error.response && error.response.status || 500;
+        res.end();
       });
-    }).catch(error => {
-      console.log("Error", error);
-      res.statusCode = error.response.status;
-      res.end();
-    });
-  })
-
+    })
+  } catch (e) {
+    console.log("Error0", req.url)
+  }
 }).listen(localPort);
 
 console.log("服务启动=>", confg.server, "=>", `http://localhost:${localPort}`, "||", `http://${localIp}:${localPort}`);

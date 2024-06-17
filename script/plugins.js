@@ -50,9 +50,11 @@ const formatScript = o => {
     const mapurls = hosts.map((o, i) => {
       return [i === 0 ? location.origin : `http://${o.localIp}:${o.localPort}`, o.host];
     });
-    return url => {
-      const ou = mapurls.find(a => url.includes(a[0])) || ["", ""], //提取原始origin
-        ourl = url.replace(ou[0], ou[1]);//还原url
+    return purl => {
+      const url = purl && purl.href || purl,
+        _url = url && (/^(?:https?:)?\/\/[^/]+\//.test(url) ? (() => url.indexOf("http") === 0 ? url : `${(mapurls[0][0]).split("//")[0]}//${url}`)() : url.replace(/^\/?/, (mapurls[0][0]).replace(/\/?$/, "/"))),
+        ou = mapurls.find(a => _url.includes(a[0])) || ["", ""], //提取原始origin
+        ourl = _url.replace(ou[0], ou[1]);//还原url
       return mps.filter(a => {
         return a.length > 1 && typeof a[1] === "function" && (typeof a[0] === "string" && ourl.includes(a[0]) || a[0].constructor === RegExp && a[0].test(ourl) || a[0] instanceof Function && a[0](ourl));
       }).reduce((r, a) => {
