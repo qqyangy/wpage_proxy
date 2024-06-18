@@ -52,7 +52,7 @@ const formatScript = o => {
     });
     return purl => {
       const url = purl && purl.href || purl,
-        _url = url && (/^(?:https?:)?\/\/[^/]+\//.test(url) ? (() => url.indexOf("http") === 0 ? url : `${(mapurls[0][0]).split("//")[0]}//${url}`)() : url.replace(/^\/?/, (mapurls[0][0]).replace(/\/?$/, "/"))),
+        _url = url && (/^(?:[a-zA-Z]{2,5}:)?\/\/[^/]+\//.test(url) ? (() => url.indexOf("/") !== 0 ? url : `${(mapurls[0][0]).split("//")[0]}//${url}`)() : url.replace(/^\/?/, (mapurls[0][0]).replace(/\/?$/, "/"))),
         ou = mapurls.find(a => _url.includes(a[0])) || ["", ""], //提取原始origin
         ourl = _url.replace(ou[0], ou[1]);//还原url
       return mps.filter(a => {
