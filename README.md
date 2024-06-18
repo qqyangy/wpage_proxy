@@ -105,7 +105,7 @@ wpage_proxy
 - `mapUrl` `:array|:array二维` 配置请求url重置映射 【全局配置】
   - `:array` 只有一组时可使用
       - 第一个值`:string|:regexp|:function` 分别使用`url.includes(array[0])`、`array[0].test(url)`、`array[0](url)` 验证是否应用当前规则
-      - 第二个值 `:function` 第一个参数元素url、第二个参数代理服务与元素服务的映射数组hosts 函数的返回值作为修改后的url使用
+      - 第二个值 `:function` 第一个参数元素url、第二个参数资源path、第三个参数代理服务与元素服务的映射数组hosts 函数的返回值作为修改后的url使用
       - 第三个值 `:boolean` 非必须 默认false 新的url是否直接使用原始服务（跳过代理服务）
   - `:array二维` 如果需要使用多条规则时使用二位数组 其中item与单数组匹配规则一致
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构

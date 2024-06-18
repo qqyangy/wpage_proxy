@@ -58,7 +58,7 @@ const formatScript = o => {
       return mps.filter(a => {
         return a.length > 1 && typeof a[1] === "function" && (typeof a[0] === "string" && ourl.includes(a[0]) || a[0].constructor === RegExp && a[0].test(ourl) || a[0] instanceof Function && a[0](ourl));
       }).reduce((r, a) => {
-        return { url: a[1](r.url, hosts), skip: !!a[2] };
+        return { url: a[1](r.url, ourl.replace(/^[a-zA-Z]{2,4}:\/\/[^/]+\//, "/"), hosts), skip: !!a[2] };
       }, { url: ourl, skip: false });
     }
   },
