@@ -183,7 +183,7 @@ wpage_proxy
   tools.toJson('xxx');// 返回值 "xxx"
 
   tools.jsonReset({},{"b.c.y":100}); //返回值 {b:{c:{y:100}}};
-  tools.jsonReset('{"a":10,"z":{"d":1000}}',{"s":1}); //返回值 {a:10,z:{d:1000,s:1}};
+  tools.jsonReset('{"a":10,"z":{"d":1000}}',{"s":1}); //返回值 {a:10,z:{d:1000},s:1};
   tools.jsonReset("{}");//返回{} 没第2个参数时功能与tools.toJson一致
   tools.jsonReset("xxxx",{});//返回"xxxx" 数据不可转换未对象时直接返回原值
   tools.jsonReset('{"a":{"b":20}}',{"s.y":(o)=>o.a.b+5});//返回{a:{b:20},s:{y:25}} 可使用函数与元数据其他字段建立关系
