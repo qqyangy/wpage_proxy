@@ -127,16 +127,16 @@ wpage_proxy
           - `file` `:string` 本机文件相对于配置文件的相对路劲 也可使用绝对路劲 优先级2
           - `url` `:sting` 网络资源地址`协议://域名[:宽口][:路径][:参数]` 优先级1
           - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
-    - `res` `:object|:function|:array`
+  - `res` `:object|:function|:array`
       - `:function`
           - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
           - 可通过需要修header时可设置`this.header`
           - 需要调整响应数据时 可以`this.body` 或 `return newdata`;
       - `:object`
-          - `test` 添加生效条件配置方式同 `scripts.test`配置
-          - `statusCode` `:number` 配置显示的状态码
-          - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
-          - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】如果文件在`./wpage_proxy_bodyfiles`目录中可省略wpage_proxy_bodyfiles 如：`./wpage_proxy_bodyfiles/index.html`可写成`./index.html`;
+        - `test` 添加生效条件配置方式同 `scripts.test`配置
+        - `statusCode` `:number` 配置显示的状态码
+        - `headers` `:object` 添加或覆盖指定的响应头 如:`{"content-type":"application/json"}`
+        - `bodyFile` `:string` 指定本机文件地址相对于配置文件的相对路劲或绝对路径 使用文件内容作为响应体 优先级3 【使用mock数据并不会向原服务器发送请求】如果文件在`./wpage_proxy_bodyfiles`目录中可省略wpage_proxy_bodyfiles 如：`./wpage_proxy_bodyfiles/index.html`可写成`./index.html`;
         - `body` `:function|:string|:json` 优先级2 【使用mock数据并不会向原服务器发送请求】
           - `:function`
               - 可接受一个参数 `env` 环境包
@@ -144,7 +144,7 @@ wpage_proxy
           - `:string|:json` 使用指定的数据响应
         - `handler` `:function` 对真实的象印数据处理 同res直接配置为函数的形式
       - `:array` 每个item为`:object`配置方式 并循环应用test通过的配置内容
-    - `req` `:object|:function|:array`
+  - `req` `:object|:function|:array`
       - `:function` 同res的函数配置形式
       - `:object`
           - `test/headers/bodyFile/body/handler` 同res (下面的属性可在handler中使用`this.xx`设置)
