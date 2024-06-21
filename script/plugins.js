@@ -43,7 +43,7 @@ const formatScript = o => {
   filterUrl = (url1 = "") => {
     const { url, skip } = remapUrl(url1);
     if (skip) { return url; };//判断是否需要跳过代理
-    const index = hosts.findIndex(d => url.includes(d.host));
+    const index = hosts.findIndex(d => url.includes(d.host.replace(/\/?$/, "/")));
     return index !== -1 ? url.replace(hosts[index].host, index === 0 ? location.origin : `http://${hosts[index].localIp}:${hosts[index].localPort}`) : url;
   },
   createMapUrl = mps => {
@@ -53,10 +53,10 @@ const formatScript = o => {
     return purl => {
       const url = purl && purl.href || purl,
         _url = url && url.indexOf("data:image") === 0 ? url : ((/^(?:[a-zA-Z]{2,5}:)?\/\/[^/]+\//.test(url) ? (() => url.indexOf("/") !== 0 ? url : `${(mapurls[0][0]).split("//")[0]}//${url}`)() : url.replace(/^\/?/, (mapurls[0][0]).replace(/\/?$/, "/")))),
-        ou = mapurls.find(a => _url.includes(a[0])) || ["", ""], //提取原始origin
-        ourl = _url.replace(ou[0], ou[1]);//还原url
+        ou = mapurls.find(a => _url.includes(a[0].replace(/\/?$/, "/"))) || ["", ""], //提取原始origin
+        ourl = _url.replace(ou[0].replace(/\/?$/, "/"), ou[1].replace(/\/?$/, "/"));//还原ur
       return mps.filter(a => {
-        return a.length > 1 && typeof a[1] === "function" && (typeof a[0] === "string" && ourl.includes(a[0]) || a[0].constructor === RegExp && a[0].test(ourl) || a[0] instanceof Function && a[0](ourl));
+        return a.length > 1 && typeof a[1] === "function" && (typeof a[0] === "string" && ourl.includes(a[0].replace(/\/?$/, "/")) || a[0].constructor === RegExp && a[0].test(ourl) || a[0] instanceof Function && a[0](ourl));
       }).reduce((r, a) => {
         return { url: a[1](r.url, ourl.replace(/^[a-zA-Z]{2,4}:\/\/[^/]+\//, "/"), hosts), skip: !!a[2] };
       }, { url: ourl, skip: false });
@@ -72,13 +72,19 @@ const formatScript = o => {
       return wpage_proxy_fetch(filterUrl(url), ...p);
     }
     XMLHttpRequest.prototype.open = function open(type, url, ...p) {
-      return wpage_proxy_open.call(this, type, filterUrl(url), ...p);
+      const nurl = filterUrl(url);
+      try {
+        return wpage_proxy_open.call(this, type, nurl, ...p);
+      } catch (e) {
+        debugger;
+      }
     }
     wpage_proxy_WebSocket && (window.WebSocket = function WebSocket(url, ...p) {
       return new wpage_proxy_WebSocket(filterUrl(url), ...p);
     })
     wpage_proxy_EventSource && (window.EventSource = function EventSource(url, ...p) {
-      return new wpage_proxy_EventSource(filterUrl(url), ...p);
+      const nurl = filterUrl(url);
+      return new wpage_proxy_EventSource(filterUrl(nurl), ...p);
     })
   },
   // 设置location
