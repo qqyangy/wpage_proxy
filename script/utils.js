@@ -38,16 +38,19 @@ const getObject = (d, env) => {
   //发送数据
   textcontent = (h, env, fncs) => {
     const iscode = /text|javascript|json/.test(h["content-type"]);
-    return (data) => {
+    return async (data) => {
       let result = { body: data, headers: Object.assign({}, h) };
       if (iscode && fncs.length > 0) {
-        fncs.forEach(f => {
-          const rdata = Buffer.isBuffer(result.body) ? result.body.toString() : result.body;
-          const d = f.call(result, rdata, result.headers, Object.assign({}, env));
+        for (let i = 0; i < fncs.length; i++) {
+          const f = fncs[i],
+            rdata = Buffer.isBuffer(result.body) ? result.body.toString() : result.body,
+            pd = f.call(result, rdata, result.headers, Object.assign({}, env)),
+            isPromise = pd instanceof Promise,
+            d = isPromise ? await pd : pd;
           if (d !== undefined) {
             result.body = d;
           }
-        });
+        }
         // 标准化响应体
         ({
           object: () => result.body = JSON.stringify(result.body),
@@ -146,7 +149,7 @@ function formatResCfg(res, url, results, env) {
       if ("test" in res) {
         if (!urlTest(url, res.test, env)) return;//有test但验证不通过
       }
-      const headers = res.headers && (res.headers.constructor === Object || res.headers.constructor === Function) && res.headers; //获取配置的headers
+      const headers = res.headers && (res.headers.constructor === Object || typeof res.headers.constructor === "function") && res.headers; //获取配置的headers
       switch (true) {
         case iskeys(res, ["body", "bodyFile"]):
           // 需要使用mock数据
@@ -160,7 +163,7 @@ function formatResCfg(res, url, results, env) {
             }
             return this.body;
           };
-        case res.handler && res.handler.constructor === Function:
+        case res.handler && typeof res.handler.constructor === "function":
           // 使用handler处理
           return results.push(headers ? function (...p) {
             setValue(this, res, configkeys);

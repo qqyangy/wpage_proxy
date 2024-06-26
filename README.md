@@ -128,7 +128,7 @@ wpage_proxy
           - `url` `:sting` 网络资源地址`协议://域名[:宽口][:路径][:参数]` 优先级1
           - `attrs` `:string` 需要植入到`script`标签上的额外属性 如：`defer="defer" type="text/javascript"`
   - `res` `:object|:function|:array`
-      - `:function`
+      - `:function`(可以是异步函数或返回Promise)
           - 3个参数 分别为 `data`、`headers`、`env` 原响应数据、原响应头、环境包（包括请求url、请求方式等）
           - 可通过需要修header时可设置`this.header`
           - 需要调整响应数据时 可以`this.body` 或 `return newdata`;
@@ -172,6 +172,7 @@ wpage_proxy
   - `proxyLocation` proxyLocation配置项
   - `mapUrl` mapUrl配置项
   - `hosts` 代理组域名映射信息
+  - `params` Promise<string>获取请求post参数
   - `tools` 数据转换工具包
     - `toJson` 将传入的数据转为json格式返回 1个参数(任意类型) 转换成功返回json对象不成功直接返回传入值
     - `jsonReset` 对json字符串或json数据做处理然后返回处理后数据 第1个参数(要处理的数据：任意类型) 第2个参数修改方案配置 返回修改后对象如果数据转换json失败直接返回原值

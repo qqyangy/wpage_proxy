@@ -1,8 +1,6 @@
 
 const http = require("http"),
-  request = require("request"),
   axios = require("axios"),
-  path = require("path"),
   url = require("url"),
   plugins = require("./plugins.js"),
   utils = require("./utils.js"),
@@ -66,7 +64,8 @@ const configHandlerPickUp = (headers, req, resConfig, env, bodyfile = "") => {
       istextHtml && plugins.insertInnerScript,//注入基础脚本
       istextHtml && aftersource.length > 0 && plugins.insertScriptSrcs.bind(plugins, aftersource)//注入外部js
     ],
-    filters = beforfuncs.concat(resConfig.resultfuncs).concat(afterfunc).filter(f => f && typeof f === "function");
+    bashfuncs = beforfuncs.concat(resConfig.resultfuncs).concat(afterfunc),
+    filters = bashfuncs.filter(f => f && typeof f === "function");
   // 加工响应数据
   return utils.textcontent(headers, env, filters);
 }
@@ -88,7 +87,7 @@ const accessControlRequestHeaders = (reqHeaders) => {
   return reqHeaders[key];
 }
 
-http.createServer((req, res) => {
+http.createServer(async (req, res) => {
   try {
     req.headers.origin && Object.assign(corsHeader, { "Access-Control-Allow-Origin": req.headers.origin });//允许对当前域跨域
     const requestHeaders = accessControlRequestHeaders(req.headers || {});
@@ -132,17 +131,28 @@ http.createServer((req, res) => {
       localIp,
       nhostname: url.parse(utils.urlformat(req.headers.host || req.headers.origin)).hostname,
       hosts,
-      tools: utils.tools
+      tools: utils.tools,
+      params: req.method === 'POST' ? new Promise(resolve => {
+        let body = '';
+        req.on('data', (data) => {
+          body += data;
+        });
+        req.on('end', () => {
+          try {
+            resolve(body);
+          } catch (e) {
+            resolve(body);
+          }
+        });
+      }) : null
     };
     env.nurl = env.norigin + req.url;//新的url
-
-
 
     const resConfig = utils.extractTrans(configall, confg, env)//获取配置中res项
     if (resConfig.mock) {
       const reshead = Object.assign({}, corsHeader);
       const execcontent = configHandlerPickUp(reshead, req, resConfig, env, resConfig.res.bodyFile);
-      const resultdata = execcontent(resConfig.res.body);
+      const resultdata = await execcontent(resConfig.res.body);
       resConfig.res.body = resultdata.body;
       return utils.resMock({ req, res, resConfig, reshead }); // 处理mock结果
     }
@@ -166,12 +176,12 @@ http.createServer((req, res) => {
     reqPromise.then(({ optins: reqOptions, data: reqdata }) => {
       const resStream = new MyWriteStream();//响应数据中转流
       const axiosCfg = Object.assign({ data: reqdata, responseType: 'stream' }, reqOptions)
-      axios(axiosCfg).then((d) => {
+      axios(axiosCfg).then(async (d) => {
         d.data.pipe(resStream);
         const execcontent = configHandlerPickUp(d.headers, req, resConfig, env);
-        resStream.then(d => {
+        resStream.then(async d => {
           try {
-            const resultdata = execcontent(d);
+            const resultdata = await execcontent(d);
             res.writeHead(resultdata.statusCode || res.statusCode || 200, Object.assign(resultdata.headers, corsHeader));
             res.end(resultdata.body);
           } catch (e) {

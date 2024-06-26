@@ -13,8 +13,7 @@
   "author": "yong.yang",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
-    "request": "^2.88.2"
+    "axios": "^1.4.0"
   },
   "devDependencies": {
     "uglify-js": "^3.16.1"
