@@ -39,9 +39,11 @@ const defaultlocalPort = configall.localPort || 9200,//全局默认端口
       { port = "", hostname = "" } = domain,
       protocol = (domain.protocol || "http").replace(":", ""),
       localPort = o.localPort || (defaultlocalPort + Number(i));//服务端
+    console.log(o);
     return {
       protocol,
       hostname,
+      ws: !!o.ws,
       port,
       host: port ? `${protocol}://${hostname}:${port}` : `${protocol}://${hostname}`,
       localIp,

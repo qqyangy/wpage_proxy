@@ -110,6 +110,7 @@ wpage_proxy
   - `:array二维` 如果需要使用多条规则时使用二位数组 其中item与单数组匹配规则一致
 - `proxy` `:array|:object` 配置需要代理的域名 数组时Item结构同object结构
   - `server` `:string` 配置需要代理的域名地址 `协议://域名[:端口]`
+  - `ws` `:boolean` 是否代理相同端口的ws
   - `localPort` `:number` 代理服务端口 不配置时使用递增形式继承全局
   - `disableWeinre` `:boolean` 在全局配置有weinre时当前服务是否禁止使用weinre,默认false
   - `proxyLocation` `:boolean` 是否代理location 不配置时使用递增形式继承全局

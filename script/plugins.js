@@ -43,8 +43,17 @@ const formatScript = o => {
   filterUrl = (url1 = "") => {
     const { url, skip } = remapUrl(url1);
     if (skip) { return url; };//判断是否需要跳过代理
-    const index = hosts.findIndex(d => url.includes(d.host.replace(/\/?$/, "/")));
-    return index !== -1 ? url.replace(hosts[index].host, index === 0 ? location.origin : `http://${hosts[index].localIp}:${hosts[index].localPort}`) : url;
+    if (!hosts || hosts.length < 1) return url;
+    const fhost = hosts[0],
+      urlHost = url.replace(/^\/\//, `${fhost.protocol}://`).replace(/^\/([^/])/, `${fhost.protocol}://${fhost.hostname}/$1`).replace(/([^/])\/[^/].*$/, "$1/").replace(/\/?$/, "/");//提取当前url的host
+    const hostItem = hosts.find(d => {
+      const dhost = d.host.replace(/\/?$/, "/");
+      return urlHost === dhost || d.ws && /^wss?:/.test(urlHost) && urlHost.replace(/^wss?:/, d.protocol + ":") === dhost;
+    });
+    if (!hostItem) return url;
+    const matchUrl = url.replace(/^wss?:/, hostItem.protocol + ":"),
+      rUrl = matchUrl.replace(hostItem.host, hostItem === fhost ? location.origin : `http://${hostItem.localIp}:${hostItem.localPort}`);
+    return matchUrl === url ? rUrl : rUrl.replace(/^\d+:/, "ws:");
   },
   createMapUrl = mps => {
     const mapurls = hosts.map((o, i) => {
