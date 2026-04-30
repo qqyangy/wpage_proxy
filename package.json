@@ -1,7 +1,7 @@
 {
   "name": "wpage_proxy",
   "version": "1.0.0",
-  "description": "开发调试代理",
+  "description": "Proxy debugging",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -16,6 +16,7 @@
     "axios": "^1.4.0"
   },
   "devDependencies": {
+    "@webpack-cli/generators": "^3.0.7",
     "uglify-js": "^3.16.1"
   }
 }
