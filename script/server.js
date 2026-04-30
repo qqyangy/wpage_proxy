@@ -1,11 +1,30 @@
 
 const http = require("http"),
+  https = require("https"),
+  net = require("net"),
+  tls = require("tls"),
   axios = require("axios"),
   url = require("url"),
   plugins = require("./plugins.js"),
   utils = require("./utils.js"),
   mimes = require("./mime.config.js"),
   { MyWriteStream } = require("./MyStream.js");
+
+// Reuse upstream connections for better proxy performance
+const upstreamHttpAgent = new http.Agent({
+  keepAlive: true,
+  maxSockets: 256,
+  maxFreeSockets: 64,
+  timeout: 60_000,
+  keepAliveMsecs: 30_000
+});
+const upstreamHttpsAgent = new https.Agent({
+  keepAlive: true,
+  maxSockets: 256,
+  maxFreeSockets: 64,
+  timeout: 60_000,
+  keepAliveMsecs: 30_000
+});
 
 const index = process.argv[2] || 0; // 获取配置索引
 
@@ -87,7 +106,7 @@ const accessControlRequestHeaders = (reqHeaders) => {
   return reqHeaders[key];
 }
 
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
   try {
     req.headers.origin && Object.assign(corsHeader, { "Access-Control-Allow-Origin": req.headers.origin });//允许对当前域跨域
     const requestHeaders = accessControlRequestHeaders(req.headers || {});
@@ -157,10 +176,23 @@ http.createServer(async (req, res) => {
       return utils.resMock({ req, res, resConfig, reshead }); // 处理mock结果
     }
     const nhost = port ? hostname + ":" + port : hostname,
-      headers = Object.assign(utils.deletekey(req.headers, ["accept-encoding", "if-none-match", "if-modified-since", "cache-control"]), {
+      headers = Object.assign(utils.deletekey(req.headers, [
+        "if-none-match",
+        "if-modified-since",
+        "cache-control",
+        // hop-by-hop headers (avoid interfering with keep-alive/pooling)
+        "connection",
+        "proxy-connection",
+        "keep-alive",
+        "transfer-encoding",
+        "upgrade"
+      ]), {
         host: nhost,
         referer: (req.headers.referer || "").replace(req.headers.host, nhost)
       })
+    // Force upstream to return uncompressed payloads, so our content rewriting
+    // (which removes content-encoding) won't cause garbled bytes.
+    headers["accept-encoding"] = "identity";
     if (confg.cookie) {
       headers.cookie = confg.cookie; //有配置cookie时代理cookie
     }
@@ -175,7 +207,16 @@ http.createServer(async (req, res) => {
     req.pipe(reqStream);
     reqPromise.then(({ optins: reqOptions, data: reqdata }) => {
       const resStream = new MyWriteStream();//响应数据中转流
-      const axiosCfg = Object.assign({ data: reqdata, responseType: 'stream' }, reqOptions)
+      const axiosCfg = Object.assign({
+        data: reqdata,
+        responseType: "stream",
+        // keep-alive agents for upstream connection pooling
+        httpAgent: upstreamHttpAgent,
+        httpsAgent: upstreamHttpsAgent,
+        // avoid hanging sockets under bad networks
+        timeout: 60_000,
+        transitional: { clarifyTimeoutError: true }
+      }, reqOptions)
       axios(axiosCfg).then(async (d) => {
         d.data.pipe(resStream);
         const execcontent = configHandlerPickUp(d.headers, req, resConfig, env);
@@ -197,6 +238,79 @@ http.createServer(async (req, res) => {
   } catch (e) {
     console.log("Error0", req.url)
   }
-}).listen(localPort);
+});
+
+// Keep client connections alive too (Node defaults vary by version)
+server.keepAliveTimeout = 75_000;
+server.headersTimeout = 80_000;
+server.requestTimeout = 0;
+
+// WebSocket proxy (handles Upgrade requests)
+server.on("upgrade", (req, socket, head) => {
+  const upstreamPort =
+    port ? Number(port) : (protocol === "https" ? 443 : 80);
+
+  const upstreamHostHeader = upstreamPort ? `${hostname}:${upstreamPort}` : hostname;
+
+  const upstreamHeaders = Object.assign(
+    {},
+    utils.deletekey(req.headers || {}, ["proxy-connection"]),
+    { host: upstreamHostHeader }
+  );
+
+  const requestLines = [`${req.method} ${req.url} HTTP/${req.httpVersion}`];
+  for (const [k, v] of Object.entries(upstreamHeaders)) {
+    if (v === undefined) continue;
+    if (Array.isArray(v)) {
+      for (const vv of v) requestLines.push(`${k}: ${vv}`);
+    } else {
+      requestLines.push(`${k}: ${v}`);
+    }
+  }
+  requestLines.push("", "");
+  const rawRequest = requestLines.join("\r\n");
+
+  const onUpstreamConnect = (upstreamSocket) => {
+    upstreamSocket.write(rawRequest);
+    if (head && head.length) upstreamSocket.write(head);
+
+    socket.pipe(upstreamSocket);
+    upstreamSocket.pipe(socket);
+
+    upstreamSocket.on("error", () => socket.destroy());
+    socket.on("error", () => upstreamSocket.destroy());
+  };
+
+  const onError = () => {
+    try {
+      socket.write("HTTP/1.1 502 Bad Gateway\r\n\r\n");
+    } catch { }
+    socket.destroy();
+  };
+
+  try {
+    if (protocol === "https") {
+      const upstreamSocket = tls.connect(
+        {
+          host: hostname,
+          port: upstreamPort,
+          servername: hostname
+        },
+        () => onUpstreamConnect(upstreamSocket)
+      );
+      upstreamSocket.on("error", onError);
+    } else {
+      const upstreamSocket = net.connect(
+        { host: hostname, port: upstreamPort },
+        () => onUpstreamConnect(upstreamSocket)
+      );
+      upstreamSocket.on("error", onError);
+    }
+  } catch {
+    onError();
+  }
+});
+
+server.listen(localPort);
 
 console.log("服务启动=>", confg.server, "=>", `http://localhost:${localPort}`, "||", `http://${localIp}:${localPort}`);
